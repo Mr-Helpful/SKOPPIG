@@ -9,11 +9,23 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@chakra-ui/react": "^1.8.8",
+    "@emotion/react": "^11.9.0",
+    "@emotion/styled": "^11.8.1",
+    "@fseehawer/react-circular-slider": "^2.5.0",
+    "beautiful-react-diagrams": "^0.5.1",
+    "framer-motion": "^6.3.3",
     "next": "12.1.5",
-    "react": "18.0.0",
-    "react-dom": "18.0.0"
+    "node-sass": "^7.0.1",
+    "react": "^18.0.0",
+    "react-colorful": "^5.5.1",
+    "react-dom": "18.0.0",
+    "react-icons": "^4.3.1",
+    "sass": "^1.51.0",
+    "underscore": "^1.13.3"
   },
   "devDependencies": {
+    "@types/react": "^18.0.8",
     "eslint": "8.14.0",
     "eslint-config-next": "12.1.5"
   }
