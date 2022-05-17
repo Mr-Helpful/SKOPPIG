@@ -1,0 +1,36 @@
+.bi.bi-diagram-node-custom {
+  display: inline-block;
+
+  $port-radius: .75rem;
+  $edge-weight: 0.1rem;
+
+  .bi-diagram-ports-custom {
+    display: flex;
+    position: relative;
+    justify-content: space-evenly;
+
+    .bi-diagram-port-custom {
+      width: $port-radius;
+      height: $port-radius;
+
+      border: $edge-weight solid black;
+      border-radius: $port-radius;
+
+      background-color: blue;
+    }
+  }
+  
+  .bi-diagram-content-custom {
+    display: inline-block;
+    box-sizing: border-box;
+    width: 100%;
+
+    margin: calc($port-radius / -2 - 1.75 * $edge-weight) 0;
+    padding: calc($port-radius * 0.75);
+    border: $edge-weight solid black;
+    border-radius: calc($port-radius / 2 + 0.25rem);
+
+    text-align: center;
+    background-color: white;
+  }
+}

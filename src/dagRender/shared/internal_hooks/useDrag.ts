@@ -32,7 +32,7 @@ const useCallbackRef = <P>(ref: MutableRefObject<P>) =>
       // eslint-disable-next-line no-param-reassign
       ref.current = callback
     }
-  }, [ref.current])
+  }, [ref])
 
 type DragInfo = {
   isDragging: boolean
@@ -115,7 +115,7 @@ const useDrag = (options: Options = defaultOptions) => {
         dragStartHandlerRef.current(event, { ...info })
       }
     }
-  }, [targetRef.current, info, dragStartHandlerRef.current])
+  }, [targetRef, info, dragStartHandlerRef])
 
   /**
    * Whilst dragging the element, updates the state then perform the user's onDrag handler if exists
@@ -128,7 +128,7 @@ const useDrag = (options: Options = defaultOptions) => {
         dragHandlerRef.current(event, { ...info })
       }
     }
-  }, options.throttleBy), [targetRef.current, info, dragHandlerRef.current])
+  }, options.throttleBy), [targetRef, info, dragHandlerRef])
 
   /**
    * When the dragging ends, updates the state then perform the user's onDragEnd handler if exists
@@ -142,7 +142,7 @@ const useDrag = (options: Options = defaultOptions) => {
         dragEndHandlerRef.current(event, { ...info })
       }
     }
-  }, [targetRef.current, info, dragEndHandlerRef.current])
+  }, [info, dragEndHandlerRef])
 
   /**
    * When the layout renders the target item, assign the dragging events
@@ -168,7 +168,7 @@ const useDrag = (options: Options = defaultOptions) => {
         document.removeEventListener('mouseup', _onDragEnd)
       }
     }
-  }, [targetRef.current])
+  }, [targetRef, onDragStart, onDrag, onDragEnd])
 
   return {
     ref: targetRef,

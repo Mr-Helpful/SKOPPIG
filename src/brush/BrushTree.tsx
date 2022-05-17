@@ -26,11 +26,7 @@ export const BrushTree = ({ }) => {
   })
 
   const [schema, { onChange }] = useSchema(startSchema)
-  return <div style={{
-    backgroundColor: 'cyan',
-    width: '22.5rem',
-    height: '22.5rem'
-  }}>
+  return <div>
     <Diagram schema={schema} onChange={onChange} />
   </div>
 }

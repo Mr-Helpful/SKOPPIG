@@ -19,7 +19,7 @@ const DiagramNode = (props) => {
     onDragNewSegment, onMount, onSegmentFail, onSegmentConnect, render, className, disableDrag,
   } = props
   const registerPort = usePortRegistration(inputs, outputs, onPortRegister); // get the port registration method
-  const { ref, onDragStart, onDrag } = useDrag({ throttleBy: 14 }); // get the drag n drop methods
+  const { ref, onDragStart, onDrag, onDragEnd } = useDrag({ throttleBy: 14 }); // get the drag n drop methods
   const dragStartPoint = useRef(coordinates); // keeps the drag start point in a persistent reference
 
   if (!disableDrag) {
@@ -42,6 +42,19 @@ const DiagramNode = (props) => {
     })
   }
 
+  onDragEnd((event, info) => {
+    if (onPositionChange) {
+      event.stopImmediatePropagation()
+      event.stopPropagation()
+      const offset = info.offset || [0, 0]
+      const nextCoords = [
+        dragStartPoint.current[0] - offset[0],
+        dragStartPoint.current[1] - offset[1]
+      ]
+      onPositionChange(id, nextCoords)
+    }
+  })
+
   // on component unmount, remove its references
   useNodeUnregistration(onNodeRemove, inputs, outputs, id)
 
@@ -50,7 +63,7 @@ const DiagramNode = (props) => {
 
   const classList = useMemo(() => classNames('bi bi-diagram-node', {
     [`bi-diagram-node-${type}`]: !!type && !render,
-  }, className), [type, className])
+  }, className), [type, render, className])
 
   // generate ports
   const options = { registerPort, onDragNewSegment, onSegmentFail, onSegmentConnect }
@@ -59,7 +72,7 @@ const DiagramNode = (props) => {
   const customRenderProps = { id, content, type, inputs: InputPorts, outputs: OutputPorts, data, className }
 
   return (
-    <div className={classList} ref={ref} style={getDiagramNodeStyle(coordinates, disableDrag)}>
+    <div key={id} className={classList} ref={ref} style={getDiagramNodeStyle(coordinates, disableDrag)}>
       {render && typeof render === 'function' && render(customRenderProps)}
       {!render && (
         <>

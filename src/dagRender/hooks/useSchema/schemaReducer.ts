@@ -4,47 +4,47 @@ import getNodePortsId from '../../shared/functions/getNodePortsId'
 
 /**
  * schema reducer
+ * 
+ * A Reminder here, reducer functions need to have **no** side effects
+ * As React.StrictMode may trigger them twice to check purity
  */
 const schemaReducer = (state, action) => {
   switch (action.type) {
     case ON_CHANGE:
-      return ({
+      return {
         nodes: action.payload.nodes || state.nodes || [],
-        links: action.payload.links || state.links || [],
-      })
-    case ON_NODE_ADD:
-      if (state.nodes) {
-        state.nodes.push(action.payload.node)
+        links: action.payload.links || state.links || []
       }
-      return ({
-        nodes: state.nodes || [],
+    case ON_NODE_ADD:
+      return {
+        nodes: [...(state.nodes || []), action.payload.node],
         links: state.links || [],
-      })
+      }
     case ON_NODE_REMOVE: { // remove all node's links
+      let nextNodes = state.nodes || []
       let nextLinks = state.links || []
-      if (state.nodes) {
-        const index = findIndex(state.nodes, ['id', action.payload.nodeId])
-        const inputPorts = getNodePortsId(state.nodes[index], 'inputs')
-        const outputPorts = getNodePortsId(state.nodes[index], 'outputs')
+
+      const index = findIndex(state.nodes, ['id', action.payload.nodeId])
+      if (index > 0) {
+        const inputPorts = getNodePortsId(nextNodes[index], 'inputs')
+        const outputPorts = getNodePortsId(nextNodes[index], 'outputs')
         nextLinks = nextLinks.filter(
           (link) => !inputPorts.includes(link.input) && !outputPorts.includes(link.output),
         )
-        state.nodes.splice(index, 1)
+        // an immutable splice
+        nextNodes = nextNodes.filter((_, i: number) => i !== index)
       }
 
-      return ({
-        nodes: state.nodes || [],
-        links: nextLinks,
-      })
+      return {
+        nodes: nextNodes,
+        links: nextLinks
+      }
     }
     case ON_CONNECT:
-      if (state.links) {
-        state.links.push(action.payload.link)
-      }
-      return ({
+      return {
         nodes: state.nodes || [],
-        links: state.links || [],
-      })
+        links: [...(state.links || []), action.payload.link],
+      }
     default:
       return state
   }

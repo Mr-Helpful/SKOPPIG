@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
+import classNames from 'classnames'
 import useDrag from '../../shared/internal_hooks/useDrag'
 import useCanvas from '../../shared/internal_hooks/useCanvas'
 import getRelativePoint from '../../shared/functions/getRelativePoint'
@@ -11,7 +12,7 @@ import getRelativePoint from '../../shared/functions/getRelativePoint'
  * @constructor
  */
 const Port = (props) => {
-  const { id, canLink, alignment, render, onDragNewSegment, onSegmentFail, onSegmentConnect, onMount, type, ...rest } = props
+  const { id, canLink, alignment, render, onDragNewSegment, onSegmentFail, onSegmentConnect, onMount, type, className, ...rest } = props
   const canvas = useCanvas()
   const { ref, onDrag, onDragEnd } = useDrag()
 
@@ -44,16 +45,17 @@ const Port = (props) => {
     if (ref.current && onMount) {
       onMount(id, ref.current)
     }
-  }, [ref.current])
+  }, [id, onMount, ref])
 
-  const customRenderProps = { id, direction: alignment, type }
+  const classList = useMemo(() => classNames('bi bi-diagram-port', {
+    ['bi-diagram-port-default']: !render,
+  }, className), [className, render])
+  const customRenderProps = { ref, id, direction: alignment, type, className }
 
-  return <div ref={ref}>
-    {render && typeof render === 'function' && render(customRenderProps)}
-    {!render && (
-      <div className="bi bi-diagram-port" data-port-id={id} {...rest} />
-    )}
-  </div>
+  if (render && typeof render === 'function') return render(customRenderProps)
+  else return <div
+    className={classList} data-port-id={id} key={id} ref={ref} {...rest}
+  />
 }
 
 Port.propTypes = {

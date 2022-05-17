@@ -1,37 +1,9 @@
 import { cloneElement } from 'react'
 import { Diagram, useSchema, createSchema } from '../dagRender'
 import { HStack, Spacer } from '@chakra-ui/react'
+import { CustomNode, CustomPort } from './CustomElems'
 
-function CustomNode({ inputs, outputs, ...rest }) {
-  return (
-    <div style={{ background: '#717EC3', borderRadius: '10px' }} {...rest}>
-      <div style={{ padding: '10px', color: 'white' }}>
-        Custom Node
-      </div>
-      <HStack>
-        <div
-          style={{ marginTop: '20px' }}
-        >
-          {inputs.map((port) => cloneElement(port, {
-            style: {
-              width: '50px', height: '25px', background: '#00AA00'
-            }
-          }))}
-        </div>
-        <Spacer />
-        <div
-          style={{ marginTop: '20px' }}
-        >
-          {outputs.map((port) => cloneElement(port, {
-            style: {
-              width: '50px', height: '25px', background: '#AA0000'
-            }
-          }))}
-        </div>
-      </HStack>
-    </div>
-  )
-}
+let nodeId = 4, portId = 9
 
 export function UncontrolledDiagram(props) {
   const startSchema = createSchema({
@@ -39,13 +11,25 @@ export function UncontrolledDiagram(props) {
       {
         id: 'node-1',
         content: 'Start',
-        coordinates: [100, 150],
+        coordinates: [125, 250],
         inputs: [
-          { id: 'port-0', alignment: 'left' },
-          { id: 'port-1', alignment: 'left' },
+          {
+            id: 'port-0', alignment: 'bottom',
+            className: 'bi-diagram-port-custom',
+            style: { backgroundColor: 'red' }
+          },
+          {
+            id: 'port-1', alignment: 'bottom',
+            className: 'bi-diagram-port-custom',
+            style: { backgroundColor: 'green' }
+          },
         ],
         outputs: [
-          { id: 'port-2', alignment: 'right' },
+          {
+            id: 'port-2', alignment: 'top',
+            className: 'bi-diagram-port-custom',
+            style: { backgroundColor: 'blue' }
+          },
         ],
         render: CustomNode,
         data: {
@@ -89,12 +73,33 @@ export function UncontrolledDiagram(props) {
       },
     ],
     links: [
-      { input: 'port-2', output: 'port-3' },
+      {
+        input: 'port-2', output: 'port-3',
+        // label: 'Initial'
+      },
     ]
   })
 
-  const [schema, { onChange }] = useSchema(startSchema)
+  const [schema, { onChange, addNode }] = useSchema(startSchema)
+
+  const addOne = () => {
+    addNode({
+      id: `node-${nodeId++}`,
+      content: 'Start',
+      coordinates: [125, 250],
+      inputs: [
+        { id: `port-${portId++}`, alignment: 'bottom', render: CustomPort },
+        { id: `port-${portId++}`, alignment: 'bottom', render: CustomPort },
+      ],
+      outputs: [
+        { id: `port-${portId++}`, alignment: 'top', render: CustomPort },
+      ],
+      render: CustomNode,
+    })
+  }
+
   return <div style={{ width: '100%', height: '22.5rem' }}>
     <Diagram schema={schema} onChange={onChange} />
+    <button onClick={addOne}>Add a node!</button>
   </div>
 }
