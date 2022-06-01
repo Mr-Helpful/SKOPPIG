@@ -13,7 +13,6 @@ let logId = 0
  */
 /* eslint-disable max-len */
 const useSchema = (initialSchema = initialState) => {
-  // utilise a useCallback to avoid double dispatch
   const [schema, dispatch] = useReducer(schemaReducer, initialSchema)
 
   const onChange = useCallback(({ nodes, links }) => dispatch({ type: ON_CHANGE, payload: { nodes, links } }), [])

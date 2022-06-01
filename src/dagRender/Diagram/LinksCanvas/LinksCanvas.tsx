@@ -10,7 +10,7 @@ import removeLinkFromArray from './removeLinkFromArray'
  * Handles the links' events and business logic, wraps the links within a svg
  */
 const LinksCanvas = (props) => {
-  const { nodes, segment, onChange, links } = props
+  const { nodes, segment, onChange, links, onClick } = props
 
   const removeFromLinksArray = useCallback((link) => {
     if (links.length > 0 && onChange) {
@@ -20,7 +20,7 @@ const LinksCanvas = (props) => {
   }, [links, onChange])
 
   return (
-    <svg className="bi bi-link-canvas-layer">
+    <svg onClick={onClick} className="bi bi-link-canvas-layer">
       {links && links.length > 0 && links.map((link) => (
         <DiagramLink
           link={link}
@@ -47,6 +47,7 @@ LinksCanvas.propTypes = {
     alignment: PortAlignment,
   }),
   onChange: PropTypes.func,
+  onClick: PropTypes.func,
 }
 
 LinksCanvas.defaultProps = {

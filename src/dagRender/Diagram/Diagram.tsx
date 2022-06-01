@@ -3,7 +3,8 @@ import PropTypes from 'prop-types'
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
 import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
-import { SchemaType } from '../shared/Types'
+import { ConfigType, SchemaType } from '../shared/Types'
+import { SchemaContext } from '../Context/SchemaContext'
 
 import { Alignment } from '../shared/functions/makeSvgPath'
 import { Link, Schema } from '../shared/Types-ts'
@@ -16,13 +17,17 @@ type Segment = {
 }
 
 type Config = {
-  shouldLink: (link: Link, schema: Schema) => boolean
+  shouldLink?: (link: Link, schema: Schema) => boolean
+  onNodeClick?: (id: string, schema: Schema) => void
+  onCanvasClick?: (schema: Schema) => void
 }
 
 const defaultConfig: Config = {
   shouldLink: (link: Link, schema: Schema): boolean => !schema.links.some(l =>
     l.input === link.input && l.output === link.output
-  )
+  ),
+  onNodeClick: () => { },
+  onCanvasClick: () => { }
 }
 
 /**
@@ -30,9 +35,11 @@ const defaultConfig: Config = {
  * It accepts a `schema` prop defining the current state of the diagram and emits its possible changes through the
  * `onChange` prop, allowing the developer to have the best possible control over the diagram and its interactions
  * with the user.
+ * `config` prop for additional control over the logic of the diagram.
  */
 const Diagram = (props) => {
-  const { schema, onChange, config = defaultConfig, ...rest } = props
+  const { schema, onChange, ...rest } = props
+  const config = { ...defaultConfig, ...props.config }
   const [segment, setSegment] = useState<Segment>()
   const { current: portRefs } = useRef({}); // keeps the port elements references
   const { current: nodeRefs } = useRef({}); // keeps the node elements references
@@ -60,6 +67,10 @@ const Diagram = (props) => {
     inputsPorts.forEach((input) => delete portRefs[input])
     outputsPorts.forEach((output) => delete portRefs[output])
   }, [])
+
+  const onNodeClick = id => {
+    config.onNodeClick(id, schema)
+  }
 
   // when a new segment is dragged, save it to the local state
   const onDragNewSegment = useCallback((portId, from, to, alignment) => {
@@ -90,19 +101,26 @@ const Diagram = (props) => {
     }
   }
 
+  const onCanvasClick = () => {
+    config.onCanvasClick(schema)
+  }
+
   return (
     <DiagramCanvas portRefs={portRefs} nodeRefs={nodeRefs} {...rest}>
-      <NodesCanvas
-        nodes={schema.nodes}
-        onChange={onNodesChange}
-        onNodeRegister={onNodeRegister}
-        onPortRegister={onPortRegister}
-        onNodeRemove={onNodeRemove}
-        onDragNewSegment={onDragNewSegment}
-        onSegmentFail={onSegmentFail}
-        onSegmentConnect={onSegmentConnect}
-      />
-      <LinksCanvas nodes={schema.nodes} links={schema.links} segment={segment} onChange={onLinkDelete} />
+      <SchemaContext.Provider value={schema}>
+        <NodesCanvas
+          nodes={schema.nodes}
+          onChange={onNodesChange}
+          onNodeRegister={onNodeRegister}
+          onPortRegister={onPortRegister}
+          onNodeRemove={onNodeRemove}
+          onNodeClick={onNodeClick}
+          onDragNewSegment={onDragNewSegment}
+          onSegmentFail={onSegmentFail}
+          onSegmentConnect={onSegmentConnect}
+        />
+        <LinksCanvas nodes={schema.nodes} links={schema.links} segment={segment} onChange={onLinkDelete} onClick={config.onClick} />
+      </SchemaContext.Provider>
     </DiagramCanvas>
   )
 }
@@ -116,6 +134,10 @@ Diagram.propTypes = {
    * The callback to be performed every time the model changes
    */
   onChange: PropTypes.func,
+  /**
+   * Additional diagram config
+   */
+  config: ConfigType
 }
 
 Diagram.defaultProps = {

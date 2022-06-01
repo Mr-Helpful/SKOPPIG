@@ -43,3 +43,9 @@ export const SchemaType = PropTypes.shape({
   nodes: PropTypes.arrayOf(NodeType).isRequired,
   links: PropTypes.arrayOf(LinkType),
 })
+
+export const ConfigType = PropTypes.shape({
+  shouldLink: PropTypes.func,
+  onNodeClick: PropTypes.func,
+  onCanvasClick: PropTypes.func
+})

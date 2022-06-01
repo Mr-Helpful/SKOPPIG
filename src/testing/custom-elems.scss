@@ -32,5 +32,9 @@
 
     text-align: center;
     background-color: white;
+
+    &.bi-diagram-content-selected {
+      box-shadow: 0px 0px 5px black;
+    }
   }
 }

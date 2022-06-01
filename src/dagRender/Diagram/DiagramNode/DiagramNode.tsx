@@ -15,7 +15,7 @@ import useNodeUnregistration from '../../shared/internal_hooks/useNodeUnregistra
  */
 const DiagramNode = (props) => {
   const {
-    id, content, coordinates, type, inputs, outputs, data, onPositionChange, onPortRegister, onNodeRemove,
+    id, content, coordinates, type, inputs, outputs, data, onPositionChange, onPortRegister, onNodeRemove, onNodeClick,
     onDragNewSegment, onMount, onSegmentFail, onSegmentConnect, render, className, disableDrag,
   } = props
   const registerPort = usePortRegistration(inputs, outputs, onPortRegister); // get the port registration method
@@ -52,6 +52,10 @@ const DiagramNode = (props) => {
         dragStartPoint.current[1] - offset[1]
       ]
       onPositionChange(id, nextCoords)
+    }
+    if (info.offset === null) {
+      // if we haven't moved the component, we treat it as a click
+      onNodeClick(id)
     }
   })
 
@@ -141,6 +145,10 @@ DiagramNode.propTypes = {
    */
   onNodeRemove: PropTypes.func,
   /**
+   * The callback for a click on the node
+   */
+  onNodeClick: PropTypes.func,
+  /**
    * The callback to be fired when dragging a new segment from one of the node's port
    */
   onDragNewSegment: PropTypes.func,
@@ -170,6 +178,7 @@ DiagramNode.defaultProps = {
   onMount: undefined,
   onPortRegister: undefined,
   onNodeRemove: undefined,
+  onNodeClick: undefined,
   onDragNewSegment: undefined,
   onSegmentFail: undefined,
   onSegmentConnect: undefined,
