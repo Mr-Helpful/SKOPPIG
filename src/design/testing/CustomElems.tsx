@@ -1,5 +1,5 @@
 import { RiDeleteBin2Fill, RiArrowUpSLine, RiNodeTree } from 'react-icons/ri'
-import { NodeRender } from '../dagRender/shared/Types-ts'
+import { NodeRender } from '../beautiful-react-diagrams/shared/Types-ts'
 
 export const CustomNode: NodeRender = ({
   id, content, inputs, outputs, data

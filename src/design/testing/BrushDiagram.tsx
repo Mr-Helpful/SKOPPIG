@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { Diagram, useSchema, createSchema } from '../dagRender'
+import { Diagram, useSchema, createSchema } from '../beautiful-react-diagrams'
 import { CustomNode, } from './CustomElems'
-import { childrenOf, collapsibleFrom } from '../dagRender/shared/functions/graphMethods'
-import { Schema } from '../dagRender/shared/Types-ts'
+import { childrenOf, collapsibleFrom } from '../beautiful-react-diagrams/shared/functions/graphMethods'
+import { Schema } from '../beautiful-react-diagrams/shared/Types-ts'
 
 let nId = 0, pId = 0
 
@@ -83,8 +83,8 @@ export const BrushDiagram = (initialSchema) => {
     })
   }, [addNode, onChange])
 
-  return <div style={{ width: '100%', height: '22.5rem' }}>
+  return (<div style={{ width: '100%', height: '22.5rem' }}>
     <Diagram schema={schema} onChange={onChange} />
-    <button onClick={addOne}>Add a node!</button>
-  </div>
+    <div onClick={addOne} style={{ cursor: 'pointer' }}>Add a node!</div>
+  </div>)
 }

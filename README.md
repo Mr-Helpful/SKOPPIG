@@ -1,4 +1,32 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# SKOPPIG
+
+## Primary idea
+
+This project is based around building a webapp paint project with a node based brush editor allowing for the creation and (potentially heavy) optimisation of customised brushes.
+Tools within the editor are based around these customised brushes made along with multiple sketching tools.
+
+## Layout
+
+The site can be separated into two main 'pages':
+
+### A Canvas page
+
+### A Design page
+
+This page is dedicated to designing custom brushes via a node based system
+
+![An image showing the layout of the brush design page](./README-Images/Skoppig%20-%20Design.pdf)
+
+The node system primarily uses [beautiful-react-diagrams](https://github.com/antonioru/beautiful-react-diagrams) with the following edits made:
+
+- Typescript typing has been introduced for schema components
+  - TODO: completely incorporate these types into components
+- Additional config options have been added to the Diagram element
+- Multiple graph algorithms have been added to the shared functions, to allow for folding of nodes
+  - TODO: complete node folding implementation
+- Added options to provide custom port rendering (both via custom classNames and custom render functions)
+
+The code for this modified version can be found in the `./src/beautiful-react-diagrams` directory
 
 ## Getting Started
 
@@ -26,9 +54,3 @@ To learn more about Next.js, take a look at the following resources:
 - [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
