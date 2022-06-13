@@ -1,24 +1,27 @@
-import { useContext } from "react"
-import { SchemaContext } from "../dagRender/Context/SchemaContext"
+import { RiDeleteBin2Fill, RiArrowUpSLine, RiNodeTree } from 'react-icons/ri'
+import { NodeRender } from '../dagRender/shared/Types-ts'
 
-export const CustomNode = ({
-  id, content, inputs, outputs, data, className
+export const CustomNode: NodeRender = ({
+  id, content, inputs, outputs, data
 }) => {
-  const schema = useContext(SchemaContext)
-  let contentClass = 'bi-diagram-content-custom'
-  if (data.selected) contentClass += ' bi-diagram-content-selected'
+  let contentClass = 'custom-content'
+  if (data.selected) contentClass += ' selected'
   return (
-    <div
-      className={'bi bi-diagram-node-custom'}
-      onDoubleClick={() => data.onClick(id, schema)}
-    >
-      <div className={'bi-diagram-ports-custom'}>
+    <div className={'bi custom-node'}>
+      <div className={'custom-ports'}>
         {outputs}
       </div>
-      <div className={contentClass}>
-        {content}
+      <div className={'custom-body'}>
+        <div className={contentClass}>
+          {content}
+        </div>
+        <div className={'custom-menu'}>
+          <RiDeleteBin2Fill onClick={() => data.deleteNode(id)} />
+          <RiArrowUpSLine onClick={() => data.selectCollapsible(id)} />
+          <RiNodeTree onClick={() => data.selectChildren(id)} />
+        </div>
       </div>
-      <div className={'bi-diagram-ports-custom'}>
+      <div className={'custom-ports'}>
         {inputs}
       </div>
     </div>

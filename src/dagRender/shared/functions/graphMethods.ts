@@ -1,4 +1,5 @@
 import { Schema } from "../Types-ts";
+import { difference, intersect } from "./setMethods"
 
 type Graph = { [id: string]: string[] }
 
@@ -40,16 +41,15 @@ const toGraph = (schema: Schema): Graph => {
  * (importantly, this doesn't include the node itself)
  * 
  * @param id The id of the node to search from
- * @param schema The schema to search within
+ * @param graph The linked list graph to search within
  * @return The ids of all direct descendants
  */
-export const allChildren = (id: string, schema: Schema): Set<string> => {
-  let graph = toGraph(schema)
+const graphChildren = (ids: string[], graph: Graph): Set<string> => {
+  let queue = ids
   let seen = new Set<string>()
-  let queue = [id]
 
   while (queue.length > 0) {
-    id = queue.shift()
+    let id = queue.shift()
     if (graph[id] !== undefined) {
       for (let sub of graph[id]) {
         if (!seen.has(sub)) {
@@ -63,6 +63,10 @@ export const allChildren = (id: string, schema: Schema): Set<string> => {
   return seen
 }
 
+export const childrenOf = (id: string, schema: Schema): Set<string> => {
+  return graphChildren([id], toGraph(schema))
+}
+
 /**
  * Tests whether there is a cycle in the graph containing the specified node
  * 
@@ -70,5 +74,58 @@ export const allChildren = (id: string, schema: Schema): Set<string> => {
  * @param schema The schema to check within
  */
 export const cycleWith = (id: string, schema: Schema): boolean => {
-  return allChildren(id, schema).has(id)
+  return childrenOf(id, schema).has(id)
+}
+
+/** Flips the direction of all links in a graph */
+const reverse = (graph: Graph): Graph => {
+  const reversed = {}
+  for (let id in graph) reversed[id] = []
+
+  for (let id in graph) {
+    for (let cId of graph[id]) {
+      reversed[cId].push(id)
+    }
+  }
+  return reversed
+}
+
+/** Transforms a graph into an undirected graph */
+const undirect = (graph: Graph): Graph => {
+  const undirected = {}
+  for (let id in graph) undirected[id] = []
+
+  for (let id in graph) {
+    for (let cId of graph[id]) {
+      undirected[cId].push(id)
+      undirected[id].push(cId)
+    }
+  }
+  return undirected
+}
+
+/** Finds all roots within a graph accessible from a node */
+const rootsFrom = (id: string, graph: Graph): Set<string> => {
+  const connected = graphChildren([id], undirect(graph))
+  const reversed = reverse(graph)
+  const allRoots = Object.keys(reversed).filter(id => reversed[id].length == 0)
+  return intersect(new Set(allRoots), connected)
+}
+
+/**
+ * Uses a breadth first search to find all nodes
+ * that **only** contribute to the given node
+ */
+export const collapsibleFrom = (id: string, schema: Schema): Set<string> => {
+  const graph = toGraph(schema)
+
+  // nodes accessible from the id
+  const children1 = graphChildren([id], graph)
+
+  // nodes accessible from in the graph without the node
+  const rootSet = rootsFrom(id, graph)
+  let roots = Array.from(rootSet)
+  delete graph[id]
+  const children2 = graphChildren(roots, graph)
+  return difference(children1, children2)
 }

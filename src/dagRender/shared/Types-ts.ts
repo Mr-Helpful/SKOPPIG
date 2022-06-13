@@ -17,12 +17,13 @@ export type Port = {
   id: string
   canLink?: (id: string, targetId: string, type: PortType) => boolean
   alignment?: PortAlignment
+  className?: string
 }
 
 /** Node type */
 export type NodeCoordinates = [number, number]
 
-export type Node<P> = {
+export type Node = {
   id: string
   coordinates: NodeCoordinates
   disableDrag?: boolean
@@ -30,15 +31,20 @@ export type Node<P> = {
   inputs?: Port[]
   outputs?: Port[]
   type?: 'default'
-  render?: (
-    props: Omit<Node<P>, 'coordinates'>
-  ) => ElementType | ReactNode
+  render?: NodeRender
   className?: string
-  data?: P
+  data?: any
 }
+
+export type NodeRender = (
+  props: Omit<Node, 'coordinates' | 'inputs' | 'outputs' | 'callbacks'> & {
+    inputs: ReactNode[]
+    outputs: ReactNode[]
+  }
+) => ElementType | ReactNode
 
 /** Schema type */
 export type Schema = {
-  nodes: Node<any>[]
+  nodes: Node[]
   links?: Link[]
 }

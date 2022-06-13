@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react'
+import React, { useDebugValue, useMemo, useRef } from 'react'
 import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import getDiagramNodeStyle from './getDiagramNodeStyle'
@@ -15,12 +15,14 @@ import useNodeUnregistration from '../../shared/internal_hooks/useNodeUnregistra
  */
 const DiagramNode = (props) => {
   const {
-    id, content, coordinates, type, inputs, outputs, data, onPositionChange, onPortRegister, onNodeRemove, onNodeClick,
+    id, content, coordinates, type, inputs, outputs, data, onPositionChange, onPortRegister, onNodeRemove,
     onDragNewSegment, onMount, onSegmentFail, onSegmentConnect, render, className, disableDrag,
   } = props
   const registerPort = usePortRegistration(inputs, outputs, onPortRegister); // get the port registration method
   const { ref, onDragStart, onDrag, onDragEnd } = useDrag({ throttleBy: 14 }); // get the drag n drop methods
   const dragStartPoint = useRef(coordinates); // keeps the drag start point in a persistent reference
+
+  useDebugValue(id)
 
   if (!disableDrag) {
     // when drag starts, save the starting coordinates into the `dragStartPoint` ref
@@ -52,10 +54,6 @@ const DiagramNode = (props) => {
         dragStartPoint.current[1] - offset[1]
       ]
       onPositionChange(id, nextCoords)
-    }
-    if (info.offset === null) {
-      // if we haven't moved the component, we treat it as a click
-      onNodeClick(id)
     }
   })
 

@@ -1,40 +1,86 @@
-.bi.bi-diagram-node-custom {
-  display: inline-block;
-
-  $port-radius: .75rem;
+.bi.custom-node {
+  $port-radius: 1rem;
   $edge-weight: 0.1rem;
 
-  .bi-diagram-ports-custom {
+  display: inline-block;
+
+  // a container used to space ports
+  // along the top/bottom of the node
+  .custom-ports {
     display: flex;
-    position: relative;
     justify-content: space-evenly;
 
-    .bi-diagram-port-custom {
+    // a possible styling for a circular port
+    .circle-port {
       width: $port-radius;
       height: $port-radius;
+      z-index: 1;
 
       border: $edge-weight solid black;
       border-radius: $port-radius;
-
       background-color: blue;
     }
   }
-  
-  .bi-diagram-content-custom {
-    display: inline-block;
-    box-sizing: border-box;
+
+  // styling to be used for 'content-like' items
+  %custom-box {
     width: 100%;
 
-    margin: calc($port-radius / -2 - 1.75 * $edge-weight) 0;
-    padding: calc($port-radius * 0.75);
     border: $edge-weight solid black;
     border-radius: calc($port-radius / 2 + 0.25rem);
-
-    text-align: center;
     background-color: white;
 
-    &.bi-diagram-content-selected {
+    // give some indication of a node being selected
+    &.selected {
       box-shadow: 0px 0px 5px black;
+    }
+  }
+
+  // a wrapper used to contain and align both
+  // the content and the action menu behind it
+  .custom-body {
+    display: grid;
+    margin: calc($port-radius / -2 - 0.75 * $edge-weight) 0;
+
+    // overlap the content and menu
+    .custom-content,
+    .custom-menu {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    // the content to be displayed within the node
+    .custom-content {
+      @extend %custom-box;
+      padding: calc($port-radius * 0.75);
+      text-align: center;
+    }
+
+    // the action menu for the node
+    // could contain actions such as:
+    // > delete node
+    // > duplicate node
+    // > select all children
+    // > ...
+    .custom-menu {
+      // TODO: replace this with more customised styling for the menu
+      @extend %custom-box;
+      position: relative;
+      left: 0;
+      transition: left 0.5s ease-out;
+
+      // the menu should be below the content
+      z-index: -1;
+
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+
+    // open our action menu on hover
+    &:hover .custom-menu {
+      transition-duration: 0.3s;
+      left: 1rem;
     }
   }
 }

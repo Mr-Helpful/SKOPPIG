@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import { NodeType } from '../../shared/Types'
 import DiagramNode from '../DiagramNode/DiagramNode'
 import updateNodeCoordinates from './updateNodeCoordinates'
-import { SchemaContext } from '../../Context/SchemaContext'
 
 /**
  * Handles the nodes' events and business logic
@@ -15,8 +14,6 @@ const NodesCanvas = (props) => {
     onDragNewSegment, onSegmentFail, onSegmentConnect, onChange,
   } = props
 
-  // const { nodes } = useContext(SchemaContext)
-
   // when a node item update its position updates it within the nodes array
   const onNodePositionChange = (nodeId, newCoordinates) => {
     if (onChange) {
@@ -26,9 +23,10 @@ const NodesCanvas = (props) => {
   }
 
   return nodes && nodes.length > 0 &&
-    nodes.map(({ data, ...node }) => (
+    nodes.map(({ data, id, ...node }) => (
       <DiagramNode
         {...node}
+        id={id}
         data={data}
         onPositionChange={onNodePositionChange}
         onPortRegister={onPortRegister}
@@ -38,13 +36,14 @@ const NodesCanvas = (props) => {
         onSegmentFail={onSegmentFail}
         onSegmentConnect={onSegmentConnect}
         onMount={onNodeRegister}
-        key={node.id}
+        key={id}
       />
     ))
 }
 
 NodesCanvas.propTypes = {
   nodes: PropTypes.arrayOf(NodeType),
+  callRefs: PropTypes.shape({}),
   onChange: PropTypes.func,
   onNodeRegister: PropTypes.func,
   onPortRegister: PropTypes.func,
@@ -57,6 +56,7 @@ NodesCanvas.propTypes = {
 
 NodesCanvas.defaultProps = {
   nodes: [],
+  callRefs: {},
   onChange: undefined,
   onNodeRegister: undefined,
   onPortRegister: undefined,

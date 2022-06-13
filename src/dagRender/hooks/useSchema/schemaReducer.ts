@@ -1,6 +1,16 @@
 import findIndex from 'lodash.findindex'
 import { ON_CHANGE, ON_CONNECT, ON_NODE_ADD, ON_NODE_REMOVE } from './actionTypes'
 import getNodePortsId from '../../shared/functions/getNodePortsId'
+import { Schema, Node, Link } from '../../shared/Types-ts'
+
+type ActionType = {
+  type: string
+  payload: Partial<Schema & {
+    node: Node
+    nodeId: string
+    link: Link
+  }>
+}
 
 /**
  * schema reducer
@@ -8,7 +18,7 @@ import getNodePortsId from '../../shared/functions/getNodePortsId'
  * A Reminder here, reducer functions need to have **no** side effects
  * As React.StrictMode may trigger them twice to check purity
  */
-const schemaReducer = (state, action) => {
+const schemaReducer = (state: Schema, action: ActionType) => {
   switch (action.type) {
     case ON_CHANGE:
       return {
@@ -25,7 +35,7 @@ const schemaReducer = (state, action) => {
       let nextLinks = state.links || []
 
       const index = findIndex(state.nodes, ['id', action.payload.nodeId])
-      if (index > 0) {
+      if (index >= 0) {
         const inputPorts = getNodePortsId(nextNodes[index], 'inputs')
         const outputPorts = getNodePortsId(nextNodes[index], 'outputs')
         nextLinks = nextLinks.filter(
