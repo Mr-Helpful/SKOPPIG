@@ -1,20 +1,24 @@
-.bi.custom-node {
+.bi.node {
   $port-radius: 1rem;
   $edge-weight: 0.1rem;
+  $border-radius: 0.75rem;
 
   display: inline-block;
 
   // a container used to space ports
   // along the top/bottom of the node
-  .custom-ports {
+  .ports {
     display: flex;
     justify-content: space-evenly;
 
+    &>* {
+      z-index: 1;
+    }
+
     // a possible styling for a circular port
-    .circle-port {
+    .circlePort {
       width: $port-radius;
       height: $port-radius;
-      z-index: 1;
 
       border: $edge-weight solid black;
       border-radius: $port-radius;
@@ -23,11 +27,9 @@
   }
 
   // styling to be used for 'content-like' items
-  %custom-box {
-    width: 100%;
-
+  %box {
     border: $edge-weight solid black;
-    border-radius: calc($port-radius / 2 + 0.25rem);
+    border-radius: $border-radius;
     background-color: white;
 
     // give some indication of a node being selected
@@ -38,20 +40,20 @@
 
   // a wrapper used to contain and align both
   // the content and the action menu behind it
-  .custom-body {
+  .body {
     display: grid;
     margin: calc($port-radius / -2 - 0.75 * $edge-weight) 0;
 
     // overlap the content and menu
-    .custom-content,
-    .custom-menu {
+    .content,
+    .menu {
       grid-column: 1;
       grid-row: 1;
     }
 
     // the content to be displayed within the node
-    .custom-content {
-      @extend %custom-box;
+    .content {
+      @extend %box;
       padding: calc($port-radius * 0.75);
       text-align: center;
     }
@@ -62,9 +64,9 @@
     // > duplicate node
     // > select all children
     // > ...
-    .custom-menu {
+    .menu {
       // TODO: replace this with more customised styling for the menu
-      @extend %custom-box;
+      @extend %box;
       position: relative;
       left: 0;
       transition: left 0.5s ease-out;
@@ -78,7 +80,7 @@
     }
 
     // open our action menu on hover
-    &:hover .custom-menu {
+    &:hover .menu {
       transition-duration: 0.3s;
       left: 1rem;
     }

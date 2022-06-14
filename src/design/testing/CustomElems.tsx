@@ -1,31 +1,32 @@
 import { RiDeleteBin2Fill, RiArrowUpSLine, RiNodeTree } from 'react-icons/ri'
 import { NodeRender } from '../beautiful-react-diagrams/shared/Types-ts'
+import styles from './CustomElems.module.scss'
 
 export const CustomNode: NodeRender = ({
   id, content, inputs, outputs, data
 }) => {
-  let contentClass = 'custom-content'
-  if (data.selected) contentClass += ' selected'
+  let contentClass = styles.content
+  if (data.selected) contentClass += ` ${styles.selected}`
   return (
-    <div className={'bi custom-node'}>
-      <div className={'custom-ports'}>
+    <div className={`${styles.bi} ${styles.node}`}>
+      <div className={styles.ports}>
         {outputs}
       </div>
-      <div className={'custom-body'}>
+      <div className={styles.body}>
         <div className={contentClass}>
           {content}
         </div>
-        <div className={'custom-menu'}>
+        <div className={styles.menu}>
           <RiDeleteBin2Fill onClick={() => data.deleteNode(id)} />
-          <RiArrowUpSLine onClick={() => data.selectCollapsible(id)} />
-          <RiNodeTree onClick={() => data.selectChildren(id)} />
+          <RiArrowUpSLine onClick={() => data.collapse(id)} />
+          <RiNodeTree onClick={() => data.selectCollapsible(id)} />
         </div>
       </div>
-      <div className={'custom-ports'}>
+      <div className={styles.ports}>
         {inputs}
       </div>
     </div>
-  )
+  );
 }
 
 export const CustomPort = ({ id, ref, direction, type, className, ...rest }) => {
