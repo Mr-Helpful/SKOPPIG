@@ -104,12 +104,22 @@ const undirect = (graph: Graph): Graph => {
   return undirected
 }
 
-/** Finds all roots within a graph accessible from a node */
-const rootsFrom = (id: string, graph: Graph): Set<string> => {
-  const connected = graphChildren([id], undirect(graph))
+/** Finds **all** roots in a given graph */
+const graphRoots = (graph: Graph): Set<string> => {
   const reversed = reverse(graph)
-  const allRoots = Object.keys(reversed).filter(id => reversed[id].length == 0)
-  return intersect(new Set(allRoots), connected)
+  const nodeIds = Object.keys(reversed)
+  return new Set(nodeIds.filter(id => reversed[id].length == 0))
+}
+
+/** Finds **all** roots in a schema */
+export const rootsIn = (schema: Schema): Set<string> => {
+  return graphRoots(toGraph(schema))
+}
+
+/** Finds all roots within a graph accessible from a node */
+const graphRootsFrom = (id: string, graph: Graph): Set<string> => {
+  const connected = graphChildren([id], undirect(graph))
+  return intersect(graphRoots(graph), connected)
 }
 
 /**
@@ -123,7 +133,7 @@ export const collapsibleFrom = (id: string, schema: Schema): Set<string> => {
   const children1 = graphChildren([id], graph)
 
   // nodes accessible from in the graph without the node
-  const rootSet = rootsFrom(id, graph)
+  const rootSet = graphRootsFrom(id, graph)
   let roots = Array.from(rootSet)
   delete graph[id]
   const children2 = graphChildren(roots, graph)
@@ -182,7 +192,6 @@ const portToNode = (schema: Schema): { [portId: string]: string } => {
  */
 export const exposedPorts = (ids: Set<string>, schema: Schema): Port[] => {
   let portMap = portToNode(schema)
-  console.log(portMap)
   let nodes = schema.nodes.filter(node => ids.has(node.id))
   let ports = nodes.map(node => node.inputs).flat()
   return ports.filter(({ id }) => !ids.has(portMap[id]))

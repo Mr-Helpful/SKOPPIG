@@ -5,6 +5,7 @@ import {
   childrenOf,
   collapsibleFrom,
   exposedPorts,
+  rootsIn,
   splitSchema
 } from '../beautiful-react-diagrams/shared/functions/graphMethods'
 import { Schema, Node } from '../beautiful-react-diagrams/shared/Types-ts'
@@ -88,6 +89,9 @@ export const BrushDiagram = (initialSchema) => {
     const selNode = schema.nodes.find(node => node.id === id)
     const { data: { collapsed }, coordinates: selCoords } = selNode
     if (collapsed === undefined) return schema
+
+    const roots = rootsIn(collapsed)
+    const root = roots.keys()[0] // TODO: returns `undefined`!
 
     // reverse the offset transformation on nodes
     const inSchema = {
