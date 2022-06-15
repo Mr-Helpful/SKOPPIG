@@ -127,6 +127,8 @@ export const collapsibleFrom = (id: string, schema: Schema): Set<string> => {
   let roots = Array.from(rootSet)
   delete graph[id]
   const children2 = graphChildren(roots, graph)
+
+  // nodes only accessible from the node
   return difference(children1, children2)
 }
 

@@ -1,4 +1,6 @@
-import { RiDeleteBin2Fill, RiArrowUpSLine, RiNodeTree } from 'react-icons/ri'
+import {
+  RiDeleteBin2Fill, RiArrowUpSLine, RiArrowDownSLine, RiNodeTree
+} from 'react-icons/ri'
 import { NodeRender } from '../beautiful-react-diagrams/shared/Types-ts'
 import styles from './CustomElems.module.scss'
 
@@ -19,6 +21,7 @@ export const CustomNode: NodeRender = ({
         <div className={styles.menu}>
           <RiDeleteBin2Fill onClick={() => data.deleteNode(id)} />
           <RiArrowUpSLine onClick={() => data.collapse(id)} />
+          <RiArrowDownSLine onClick={() => data.expand(id)} />
           <RiNodeTree onClick={() => data.selectCollapsible(id)} />
         </div>
       </div>

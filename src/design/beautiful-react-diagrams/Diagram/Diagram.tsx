@@ -37,11 +37,25 @@ const defaultConfig: Config = {
  * `config` prop for additional control over the logic of the diagram.
  */
 const Diagram = (props) => {
-  const { schema, onChange, ...rest } = props
+  const { schema, onChange, showRef, ...rest } = props
   const config = { ...defaultConfig, ...props.config }
   const [segment, setSegment] = useState<Segment>()
   const { current: portElems } = useRef({}) // keeps the port elements references
   const { current: nodeElems } = useRef({}) // keeps the node elements references
+
+  useEffect(() => {
+    showRef.current.show = () => {
+      console.log("%cNew references", "color: green")
+      for (let id in portElems) {
+        console.log(id)
+        console.log(portElems[id])
+      }
+      for (let id in nodeElems) {
+        console.log(id)
+        console.log(nodeElems[id])
+      }
+    }
+  })
 
   // when nodes change, performs the onChange callback with the new incoming data
   const onNodesChange = (nextNodes) => {
@@ -145,6 +159,7 @@ Diagram.propTypes = {
    * The callback to be performed every time the model changes
    */
   onChange: PropTypes.func,
+  showRef: PropTypes.shape({}),
   /**
    * Additional diagram config
    */
@@ -154,6 +169,7 @@ Diagram.propTypes = {
 Diagram.defaultProps = {
   schema: { nodes: [], links: [] },
   onChange: undefined,
+  showRef: { show: () => { } }
 }
 
 export default React.memo(Diagram)
