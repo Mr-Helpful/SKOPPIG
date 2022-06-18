@@ -1,4 +1,4 @@
-const getPathMidpoint = (pathElement): [number, number] => {
+const getPathMidpoint = (pathElement: SVGPathElement): [number, number] => {
   if (pathElement.getTotalLength && pathElement.getPointAtLength) {
     const midpoint = pathElement.getTotalLength() / 2
     const { x, y } = pathElement.getPointAtLength(midpoint)

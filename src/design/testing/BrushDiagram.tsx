@@ -34,9 +34,7 @@ export const BrushDiagram = (initialSchema) => {
   const nId = useRef(0)
   const pId = useRef(0)
 
-  const showRef = useRef({
-    show: () => { }
-  })
+  const { current: display } = useRef({ show: () => { } })
 
   const select = (ids: Set<string>, { nodes, links }: Schema) => ({
     nodes: nodes.map(({ id, data, ...node }) => ({
@@ -90,8 +88,7 @@ export const BrushDiagram = (initialSchema) => {
     const { data: { collapsed }, coordinates: selCoords } = selNode
     if (collapsed === undefined) return schema
 
-    const roots = rootsIn(collapsed)
-    const root = roots.keys()[0] // TODO: returns `undefined`!
+    const root = rootsIn(collapsed).keys().next().value
 
     // reverse the offset transformation on nodes
     const inSchema = {
@@ -157,17 +154,20 @@ export const BrushDiagram = (initialSchema) => {
           methodsRef.current.onChange(nSchema)
         },
         expand: (id: string) => {
-          const nSchema = expandFrom(id, schemaRef.current)
-          methodsRef.current.onChange(nSchema)
+          const { nodes, links } = expandFrom(id, schemaRef.current)
+          methodsRef.current.onChange({ nodes, links })
+          methodsRef.current.onChange({ nodes })
         }
       }
     })
   }, [addNode, onChange])
 
-  return (<div style={{ width: '100%', height: '22.5rem' }}>
-    <Diagram schema={schema} onChange={onChange} showRef={showRef} />
-    <div onClick={addOne}>Add a node!</div>
-    <div> </div>
-    <div onClick={showRef.current.show}>Show the refs!</div>
-  </div>)
+  return (
+    <div style={{ width: '100%', height: '22.5rem' }}>
+      <Diagram schema={schema} onChange={onChange} display={display} />
+      <div onClick={addOne}>Add a node!</div>
+      <div> </div>
+      <div onClick={display.show}>Show the refs!</div>
+    </div>
+  )
 }

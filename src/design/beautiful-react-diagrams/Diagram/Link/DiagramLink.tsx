@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
-import { LinkType, NodeType, PortType } from '../../shared/Types'
 import usePortRefs from '../../shared/internal_hooks/usePortRefs'
 import useCanvas from '../../shared/internal_hooks/useCanvas'
 import getCoords from './getEntityCoordinates'
@@ -9,6 +7,8 @@ import makeSvgPath from '../../shared/functions/makeSvgPath'
 import getPathMidpoint from '../../shared/functions/getPathMidpoint'
 import useNodeRefs from '../../shared/internal_hooks/useNodeRefs'
 import LinkLabel from './LinkLabel'
+import { DiagramEntity } from '../LinksCanvas/findInvolvedEntity'
+import { Link } from '../../shared/Types-ts'
 
 // local hook, returns portRefs & nodeRefs
 const useContextRefs = () => {
@@ -19,11 +19,17 @@ const useContextRefs = () => {
   return { canvas, nodeRefs, portRefs }
 }
 
+interface LinkProps {
+  input: DiagramEntity
+  output: DiagramEntity
+  link: Link
+  onDelete: (link: Link) => void
+}
+
 /**
  * A Diagram link component displays the link between two diagram nodes or two node ports.
  */
-const Link = (props) => {
-  const { input, output, link, onDelete } = props
+const DiagramLink = ({ input, output, link, onDelete }: LinkProps) => {
   const pathRef = useRef()
   const [labelPosition, setLabelPosition] = useState<[number, number]>()
   const { canvas, portRefs, nodeRefs } = useContextRefs()
@@ -34,8 +40,8 @@ const Link = (props) => {
   /* eslint-enable max-len */
   const pathOptions = {
     type: (input.type === 'port' || output.type === 'port') ? 'bezier' : 'curve',
-    inputAlignment: input.entity.alignment || null,
-    outputAlignment: output.entity.alignment || null,
+    inputAlignment: ({ ...input.entity, alignment: null }).alignment,
+    outputAlignment: ({ ...output.entity, alignment: null }).alignment,
   }
   const path = useMemo(() => makeSvgPath(inputPoint, outputPoint, pathOptions), [inputPoint, outputPoint])
 
@@ -63,20 +69,8 @@ const Link = (props) => {
   )
 }
 
-const InvolvedEntity = PropTypes.exact({
-  type: PropTypes.oneOf(['node', 'port']),
-  entity: PropTypes.oneOfType([PortType, NodeType]),
-})
-
-Link.propTypes = {
-  link: LinkType.isRequired,
-  input: InvolvedEntity.isRequired,
-  output: InvolvedEntity.isRequired,
-  onDelete: PropTypes.func,
-}
-
-Link.defaultProps = {
+DiagramLink.defaultProps = {
   onDelete: undefined,
 }
 
-export default React.memo(Link)
+export default React.memo(DiagramLink)

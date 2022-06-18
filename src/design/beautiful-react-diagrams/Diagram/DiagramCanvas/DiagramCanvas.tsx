@@ -1,28 +1,38 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { ReactNode, useEffect, useRef, useState } from 'react'
 import { useWindowScroll, useWindowResize } from 'beautiful-react-hooks'
-import isEqual from 'lodash.isequal'
-import PropTypes from 'prop-types'
+import DiagramCanvasProps from 'prop-types'
 import classNames from 'classnames'
-import DiagramContext from '../../Context/DiagramContext'
+import DiagramContext, { ElementObject } from '../../Context/DiagramContext'
+
+interface DiagramCanvasProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: ReactNode
+  portRefs: ElementObject
+  nodeRefs: ElementObject
+  className?: string
+}
 
 /**
  * The DiagramCanvas component provides a context to the Diagram children.
  * The context contains the canvas bounding box (for future calculations) and the port references in order to
  * allow links to easily access to a the ports coordinates
  */
-const DiagramCanvas = (props) => {
-  const { children, portRefs, nodeRefs, className, ...rest } = props
-  const [bbox, setBoundingBox] = useState(null)
-  const canvasRef = useRef()
+const DiagramCanvas = ({
+  children, portRefs, nodeRefs, className, ...rest
+}: DiagramCanvasProps) => {
+  const [bbox, setBoundingBox] = useState<DOMRect>(null)
+  const canvasRef = useRef<HTMLDivElement>()
   const classList = classNames('bi bi-diagram', className)
 
   // calculate the given element bounding box and save it into the bbox state
-  const calculateBBox = (el) => {
+  const calculateBBox = (el: HTMLElement) => {
     if (el) {
       const nextBBox = el.getBoundingClientRect()
-      if (!isEqual(nextBBox, bbox)) {
-        setBoundingBox(nextBBox)
-      }
+      if (
+        nextBBox.x !== bbox.x ||
+        nextBBox.y !== bbox.y ||
+        nextBBox.width !== bbox.width ||
+        nextBBox.height !== bbox.height
+      ) setBoundingBox(nextBBox)
     }
   }
 
@@ -36,18 +46,12 @@ const DiagramCanvas = (props) => {
   return (
     <div className={classList} ref={canvasRef} {...rest}>
       <div className="bi-diagram-canvas">
-        <DiagramContext.Provider value={{ canvas: bbox, ports: portRefs, nodes: nodeRefs, _nodes: {} }}>
+        <DiagramContext.Provider value={{ canvas: bbox, ports: portRefs, nodes: nodeRefs }}>
           {children}
         </DiagramContext.Provider>
       </div>
     </div>
   )
-}
-
-DiagramCanvas.propTypes = {
-  portRefs: PropTypes.shape({}),
-  nodeRefs: PropTypes.shape({}),
-  className: PropTypes.string,
 }
 
 DiagramCanvas.defaultProps = {

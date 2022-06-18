@@ -1,28 +1,43 @@
 import React, { useDebugValue, useMemo, useRef } from 'react'
-import PropTypes from 'prop-types'
 import classNames from 'classnames'
 import getDiagramNodeStyle from './getDiagramNodeStyle'
 import { usePortRegistration, useNodeRegistration } from '../../shared/internal_hooks/useContextRegistration'
-import { PortType } from '../../shared/Types'
 import portGenerator from './portGenerator'
 import useDrag from '../../shared/internal_hooks/useDrag'
 import useNodeUnregistration from '../../shared/internal_hooks/useNodeUnregistration'
+import { Node, PortAlignment } from '../../shared/Types-ts'
+
+interface DiagramNodeProps extends Node {
+  /** The callback to be fired when position changes */
+  onPositionChange: any
+  /** The callback to be fired when a new port is settled */
+  onPortRegister: (id: string, el: HTMLElement) => void
+  /** The callback to be fired when component unmount */
+  onNodeRemove: (id: string, inputs: string[], outputs: string[]) => void
+  /** The callback to be fired when dragging a new segment from one of the node's port */
+  onDragNewSegment: (id: string, from: [number, number], to: [number, number], alignment: PortAlignment) => void
+  /** The callback to be fired when a new diagram is mounted */
+  onMount: (id: string, el: HTMLElement) => void
+  /** The callback to be fired when a new segment fails to connect */
+  onSegmentFail: (id: string, type: 'input' | 'output') => void
+  /** The callback to be fired when a new segment connects to a port */
+  onSegmentConnect: (input: string, output: string) => void
+}
 
 /**
  * A Diagram Node component displays a single diagram node, handles the drag n drop business logic and fires the
  * related callback. Displays input and output ports if existing and takes care of firing the `onPortRegister` callback
  * when a port is ready (aka rendered),
  */
-const DiagramNode = (props) => {
-  const {
-    id, content, coordinates, type, inputs, outputs, data, onPositionChange, onPortRegister, onNodeRemove,
-    onDragNewSegment, onMount, onSegmentFail, onSegmentConnect, render, className, disableDrag,
-  } = props
-  const registerPort = usePortRegistration(inputs, outputs, onPortRegister); // get the port registration method
-  const { ref, onDragStart, onDrag, onDragEnd } = useDrag({ throttleBy: 14 }); // get the drag n drop methods
-  const dragStartPoint = useRef(coordinates); // keeps the drag start point in a persistent reference
-
-  useDebugValue(id)
+const DiagramNode = ({
+  id, coordinates, disableDrag, content,
+  inputs, outputs, type, render, className, data,
+  onPositionChange, onPortRegister, onNodeRemove,
+  onDragNewSegment, onMount, onSegmentFail, onSegmentConnect,
+}: DiagramNodeProps) => {
+  const registerPort = usePortRegistration(inputs, outputs, onPortRegister) // get the port registration method
+  const { ref, onDragStart, onDrag, onDragEnd } = useDrag<HTMLDivElement>({ throttleBy: 14 }) // get the drag n drop methods
+  const dragStartPoint = useRef(coordinates) // keeps the drag start point in a persistent reference
 
   if (!disableDrag) {
     // when drag starts, save the starting coordinates into the `dragStartPoint` ref
@@ -91,78 +106,6 @@ const DiagramNode = (props) => {
       )}
     </div>
   )
-}
-
-DiagramNode.propTypes = {
-  /**
-   * The diagram node id
-   */
-  id: PropTypes.oneOfType([PropTypes.string]).isRequired,
-  /**
-   * The diagram current coordinates, relative to the container
-   */
-  coordinates: PropTypes.arrayOf(PropTypes.number).isRequired,
-  /**
-   * The diagram content
-   */
-  content: PropTypes.oneOfType([PropTypes.elementType, PropTypes.node]),
-  /**
-   * An array of input ports
-   */
-  inputs: PropTypes.arrayOf(PortType),
-  /**
-   * An array of output ports
-   */
-  outputs: PropTypes.arrayOf(PortType),
-  /**
-   * The node type
-   */
-  type: PropTypes.oneOf(['default']),
-  /**
-   * An object to possibly keep data between renders
-   */
-  data: PropTypes.shape({}),
-  /**
-   * Defines a custom render function
-   */
-  render: PropTypes.func,
-  /**
-   * The callback to be fired when position changes
-   */
-  onPositionChange: PropTypes.func,
-  /**
-   * The callback to be fired when a new diagram is mounted
-   */
-  onMount: PropTypes.func,
-  /**
-   * The callback to be fired when a new port is settled
-   */
-  onPortRegister: PropTypes.func,
-  /**
-   * The callback to be fired when component unmount
-   */
-  onNodeRemove: PropTypes.func,
-  /**
-   * The callback for a click on the node
-   */
-  onNodeClick: PropTypes.func,
-  /**
-   * The callback to be fired when dragging a new segment from one of the node's port
-   */
-  onDragNewSegment: PropTypes.func,
-  /**
-   * The callback to be fired when a new segment fails to connect
-   */
-  onSegmentFail: PropTypes.func,
-  /**
-   * The callback to be fired when a new segment connects to a port
-   */
-  onSegmentConnect: PropTypes.func,
-  /**
-   * The possible className
-   */
-  className: PropTypes.string,
-  disableDrag: PropTypes.bool,
 }
 
 DiagramNode.defaultProps = {

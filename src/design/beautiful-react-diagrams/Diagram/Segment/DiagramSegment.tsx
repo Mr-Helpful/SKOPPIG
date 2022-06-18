@@ -1,12 +1,17 @@
 import React, { useMemo } from 'react'
-import PropTypes from 'prop-types'
-import { PortAlignment } from '../../shared/Types'
 import makeSvgPath from '../../shared/functions/makeSvgPath'
+import { PortAlignment } from '../../shared/Types-ts'
+
+export interface Segment {
+  from: [number, number]
+  to: [number, number]
+  alignment: PortAlignment
+}
 
 /**
  * Segment
  */
-const Segment = (props) => {
+const DiagramSegment = (props: Segment) => {
   const { from, to, alignment } = props
   const pathOptions = { type: 'bezier', inputAlignment: alignment }
   const path = useMemo(() => makeSvgPath(from, to, pathOptions), [from, to, alignment])
@@ -19,14 +24,8 @@ const Segment = (props) => {
   )
 }
 
-Segment.propTypes = {
-  from: PropTypes.arrayOf(PropTypes.number).isRequired,
-  to: PropTypes.arrayOf(PropTypes.number).isRequired,
-  alignment: PortAlignment,
-}
-
-Segment.defaultProps = {
+DiagramSegment.defaultProps = {
   alignment: undefined,
 }
 
-export default React.memo(Segment)
+export default React.memo(DiagramSegment)

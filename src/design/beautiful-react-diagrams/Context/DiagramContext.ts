@@ -1,14 +1,15 @@
-import React, { MutableRefObject } from 'react'
+import { createContext } from 'react'
 
-type RefObject = {
+export type ElementObject = {
   [key: string]: HTMLElement
 }
 
-type DiagramRefs = {
-  // canvas: MutableRefObject
-  ports: MutableRefObject<HTMLElement>
+type ContextValue = {
+  canvas: DOMRect
+  ports: ElementObject
+  nodes: ElementObject
 }
 
-export default React.createContext({
-  canvas: null, ports: null, nodes: null, _nodes: null
+export default createContext<ContextValue>({
+  canvas: null, ports: null, nodes: null
 })

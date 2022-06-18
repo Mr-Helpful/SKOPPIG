@@ -4,7 +4,7 @@ import ERR from '../Errors'
 /**
  * Validates a schema port object
  */
-export const validatePort = (port) => {
+export const validatePort = (port: any): boolean => {
   if (!port.id) {
     throw ERR.INVALID_PORT_ID()
   }
@@ -23,7 +23,7 @@ export const validatePort = (port) => {
 /**
  * Validates a schema node object
  */
-export const validateNode = (node) => {
+export const validateNode = (node: any): boolean => {
   if (!node.id) {
     throw ERR.INVALID_ID()
   }
@@ -59,7 +59,7 @@ export const validateNode = (node) => {
 /**
  * Validates the nodes array
  */
-export const validateNodes = (nodes) => {
+export const validateNodes = (nodes: any[]): boolean => {
   if (!Array.isArray(nodes)) {
     throw ERR.INVALID_NODES_ARRAY()
   }
@@ -72,7 +72,7 @@ export const validateNodes = (nodes) => {
 /**
  * Validates a single links
  */
-export const validateLink = (link) => {
+export const validateLink = (link: any): boolean => {
   if (!link.input || !link.output || typeof link.input !== 'string' || typeof link.output !== 'string') {
     throw ERR.LINK_INVALID_INPUT_OUTPUT()
   }
@@ -87,7 +87,7 @@ export const validateLink = (link) => {
 /**
  * Validates the links array
  */
-export const validateLinks = (links) => {
+export const validateLinks = (links: any[]): boolean => {
   if (!Array.isArray(links)) {
     throw ERR.INVALID_LINKS_ARRAY()
   }
@@ -100,7 +100,7 @@ export const validateLinks = (links) => {
 /**
  * Validates the schema object
  */
-export const validateSchema = ({ links, nodes }) => {
+export const validateSchema = ({ links, nodes }): boolean => {
   if (!nodes) {
     throw ERR.MUST_HAVE_NODES()
   }

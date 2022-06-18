@@ -1,32 +1,44 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react'
-import PropTypes from 'prop-types'
+import React, { useCallback, useState, useRef, useEffect, HTMLAttributes } from 'react'
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
 import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
-import { ConfigType, SchemaType } from '../shared/Types'
 
-import { Alignment } from '../shared/functions/makeSvgPath'
-import { Link, Schema } from '../shared/Types-ts'
+import { Link, Node, PortAlignment, Schema } from '../shared/Types-ts'
+import { ElementObject } from '../Context/DiagramContext'
 
 type Segment = {
   id: string
   from: [number, number]
   to: [number, number]
-  alignment: Alignment
+  alignment: PortAlignment
 }
 
 type Config = {
-  shouldLink?: (link: Link, schema: Schema) => boolean
-  onNodeClick?: (id: string, schema: Schema) => void
-  onCanvasClick?: (schema: Schema) => void
+  shouldLink: (link: Link, schema: Schema) => boolean
+  onCanvasClick: (schema: Schema) => void
 }
 
 const defaultConfig: Config = {
-  shouldLink: (link: Link, schema: Schema): boolean => !schema.links.some(l =>
+  shouldLink: (link, schema) => !schema.links.some(l =>
     l.input === link.input && l.output === link.output
   ),
-  onNodeClick: () => { },
   onCanvasClick: () => { }
+}
+
+interface DiagramProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
+  /**
+   * The diagram current schema
+   */
+  schema: Schema
+  /**
+   * The callback to be performed every time the model changes
+   */
+  onChange: (schema: Partial<Schema>) => void
+  display?: { show: () => void }
+  /**
+   * Additional diagram config
+   */
+  config?: Config
 }
 
 /**
@@ -36,15 +48,15 @@ const defaultConfig: Config = {
  * with the user.
  * `config` prop for additional control over the logic of the diagram.
  */
-const Diagram = (props) => {
-  const { schema, onChange, showRef, ...rest } = props
-  const config = { ...defaultConfig, ...props.config }
+const Diagram = (props: DiagramProps) => {
+  const { schema, onChange, display, config: userConfig, ...rest } = props
+  const config = { ...defaultConfig, ...userConfig }
   const [segment, setSegment] = useState<Segment>()
-  const { current: portElems } = useRef({}) // keeps the port elements references
-  const { current: nodeElems } = useRef({}) // keeps the node elements references
+  const { current: portElems } = useRef<ElementObject>({}) // keeps the port elements references
+  const { current: nodeElems } = useRef<ElementObject>({}) // keeps the node elements references
 
   useEffect(() => {
-    showRef.current.show = () => {
+    display.show = () => {
       console.log("%cNew references", "color: green")
       for (let id in portElems) {
         console.log(id)
@@ -58,41 +70,39 @@ const Diagram = (props) => {
   })
 
   // when nodes change, performs the onChange callback with the new incoming data
-  const onNodesChange = (nextNodes) => {
-    if (onChange) {
-      onChange({ nodes: nextNodes })
-    }
+  const onNodesChange = (nextNodes: Node[]) => {
+    if (onChange) onChange({ nodes: nextNodes })
   }
 
   // when a port is registered, save it to the local reference
-  const onPortRegister = (portId, portEl) => {
+  const onPortRegister = (portId: string, portEl: HTMLElement) => {
     portElems[portId] = portEl
   }
 
   // when a node is registered, save it to the local reference
-  const onNodeRegister = (nodeId, nodeEl) => {
+  const onNodeRegister = (nodeId: string, nodeEl: HTMLElement) => {
     nodeElems[nodeId] = nodeEl
   }
 
   // when a node is deleted, remove its references
-  const onNodeRemove = useCallback((nodeId, inputsPorts, outputsPorts) => {
+  const onNodeRemove = useCallback((nodeId: string, inputsPorts: string[], outputsPorts: string[]) => {
     delete nodeElems[nodeId]
-    inputsPorts.forEach((input) => delete portElems[input])
-    outputsPorts.forEach((output) => delete portElems[output])
+    inputsPorts.forEach(input => delete portElems[input])
+    outputsPorts.forEach(output => delete portElems[output])
   }, [])
 
-  const onNodeDelete = (nodeId) => {
+  const onNodeDelete = (nodeId: string) => {
     let { nodes, links } = schema
 
-    const node = nodes.filter(({ id }) => id === nodeId)[0]
+    const node = nodes.find(({ id }) => id === nodeId)
     if (node !== undefined) {
-      const inputs = node.inputs ?? node.inputs.map(p => p.id)
-      const outputs = node.outputs ?? node.outputs.map(p => p.id)
+      const inputs = node.inputs && node.inputs.map(p => p.id)
+      const outputs = node.outputs && node.outputs.map(p => p.id)
 
       // remove references to the deleted node and its links
       delete nodeElems[nodeId]
-      for (let inId of inputs) delete portElems[inId]
-      for (let outId of outputs) delete portElems[outId]
+      for (let id of inputs) delete portElems[id]
+      for (let id of outputs) delete portElems[id]
 
       // remove the deleted node and links from the schema
       links = links.filter(
@@ -105,7 +115,7 @@ const Diagram = (props) => {
   }
 
   // when a new segment is dragged, save it to the local state
-  const onDragNewSegment = useCallback((portId, from, to, alignment) => {
+  const onDragNewSegment = useCallback((portId: string, from: [number, number], to: [number, number], alignment: PortAlignment) => {
     setSegment({ id: `segment-${portId}`, from, to, alignment })
   }, [])
 
@@ -116,21 +126,17 @@ const Diagram = (props) => {
 
   // when a segment connects, update the links schema, perform the onChange callback
   // with the new data, then reset the segment state
-  const onSegmentConnect = (input, output) => {
+  const onSegmentConnect = (input: string, output: string) => {
     if (config.shouldLink({ input, output }, schema)) {
-      const nextLinks = [...(schema.links || []), { input, output }]
-      if (onChange) {
-        onChange({ links: nextLinks })
-      }
+      const nextLinks: Link[] = [...(schema.links || []), { input, output }]
+      if (onChange) onChange({ links: nextLinks })
     }
     setSegment(undefined)
   }
 
   // when links change, performs the onChange callback with the new incoming data
-  const onLinkDelete = (nextLinks) => {
-    if (onChange) {
-      onChange({ links: nextLinks })
-    }
+  const onLinkDelete = (nextLinks: Link[]) => {
+    if (onChange) onChange({ links: nextLinks })
   }
 
   return (
@@ -145,31 +151,16 @@ const Diagram = (props) => {
         onSegmentFail={onSegmentFail}
         onSegmentConnect={onSegmentConnect}
       />
-      <LinksCanvas nodes={schema.nodes} links={schema.links} segment={segment} onChange={onLinkDelete} onClick={config.onClick} />
+      <LinksCanvas nodes={schema.nodes} links={schema.links} segment={segment} onChange={onLinkDelete} />
     </DiagramCanvas>
   )
-}
-
-Diagram.propTypes = {
-  /**
-   * The diagram current schema
-   */
-  schema: SchemaType,
-  /**
-   * The callback to be performed every time the model changes
-   */
-  onChange: PropTypes.func,
-  showRef: PropTypes.shape({}),
-  /**
-   * Additional diagram config
-   */
-  config: ConfigType
 }
 
 Diagram.defaultProps = {
   schema: { nodes: [], links: [] },
   onChange: undefined,
-  showRef: { show: () => { } }
+  display: { show: () => { } },
+  config: {}
 }
 
 export default React.memo(Diagram)

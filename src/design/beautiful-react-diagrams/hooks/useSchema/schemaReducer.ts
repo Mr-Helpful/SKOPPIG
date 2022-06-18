@@ -1,4 +1,3 @@
-import findIndex from 'lodash.findindex'
 import { ON_CHANGE, ON_CONNECT, ON_NODE_ADD, ON_NODE_REMOVE } from './actionTypes'
 import getNodePortsId from '../../shared/functions/getNodePortsId'
 import { Schema, Node, Link } from '../../shared/Types-ts'
@@ -34,15 +33,15 @@ const schemaReducer = (state: Schema, action: ActionType) => {
       let nextNodes = state.nodes || []
       let nextLinks = state.links || []
 
-      const index = findIndex(state.nodes, ['id', action.payload.nodeId])
-      if (index >= 0) {
-        const inputPorts = getNodePortsId(nextNodes[index], 'inputs')
-        const outputPorts = getNodePortsId(nextNodes[index], 'outputs')
+      const node = state.nodes.find(({ id }) => id === action.payload.nodeId)
+      if (node !== undefined) {
+        const ports = { inputs: [], outputs: [], ...node }
+        const inputPorts = getNodePortsId(ports, 'inputs')
+        const outputPorts = getNodePortsId(ports, 'outputs')
         nextLinks = nextLinks.filter(
           (link) => !inputPorts.includes(link.input) && !outputPorts.includes(link.output),
         )
-        // an immutable splice
-        nextNodes = nextNodes.filter((_, i: number) => i !== index)
+        nextNodes = nextNodes.filter(({ id }) => id !== action.payload.nodeId)
       }
 
       return {

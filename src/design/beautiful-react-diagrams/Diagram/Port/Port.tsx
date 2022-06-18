@@ -1,9 +1,17 @@
-import React, { useEffect, useMemo } from 'react'
-import PropTypes from 'prop-types'
+import React, { HTMLAttributes, useEffect, useMemo } from 'react'
 import classNames from 'classnames'
 import useDrag from '../../shared/internal_hooks/useDrag'
 import useCanvas from '../../shared/internal_hooks/useCanvas'
 import getRelativePoint from '../../shared/functions/getRelativePoint'
+import { Port, PortAlignment } from '../../shared/Types-ts'
+
+interface DiagramPortProps extends Port, Omit<HTMLAttributes<HTMLDivElement>, 'id'> {
+  onMount: (id: string, el: HTMLElement) => void
+  onDragNewSegment: (id: string, from: [number, number], to: [number, number], alignment: PortAlignment) => void
+  onSegmentFail: (id: string, type: 'input' | 'output') => void
+  onSegmentConnect: (input: string, output: string, type: 'input' | 'output') => void
+  type: 'input' | 'output'
+}
 
 /**
  * Port
@@ -11,10 +19,10 @@ import getRelativePoint from '../../shared/functions/getRelativePoint'
  * @returns {*}
  * @constructor
  */
-const Port = (props) => {
-  const { id, canLink, alignment, render, onDragNewSegment, onSegmentFail, onSegmentConnect, onMount, type, className, ...rest } = props
+const DiagramPort = (props: DiagramPortProps) => {
+  const { id, canLink, alignment, onDragNewSegment, onSegmentFail, onSegmentConnect, onMount, type, className, ...rest } = props
   const canvas = useCanvas()
-  const { ref, onDrag, onDragEnd } = useDrag()
+  const { ref, onDrag, onDragEnd } = useDrag<HTMLDivElement>()
 
   onDrag((event, info) => {
     if (onDragNewSegment) {
@@ -28,17 +36,13 @@ const Port = (props) => {
   })
 
   onDragEnd((event) => {
-    const targetPort = (event.target as HTMLElement)
-      .getAttribute('data-port-id')
+    const targetPort = (event.target as HTMLElement).getAttribute('data-port-id')
     if (targetPort && event.target !== ref.current && canLink(id, targetPort, type) && onSegmentConnect) {
-      const args = type === 'input' ? [id, targetPort, type] : [targetPort, id, type]
-
-      onSegmentConnect(...args)
+      if (type === 'input') onSegmentConnect(id, targetPort, type)
+      else onSegmentConnect(targetPort, id, type)
       return
     }
-    /* eslint-disable no-unused-expressions */
-    onSegmentFail && onSegmentFail(id, type)
-    /* eslint-enable no-unused-expressions */
+    if (onSegmentFail) onSegmentFail(id, type)
   })
 
   useEffect(() => {
@@ -47,31 +51,14 @@ const Port = (props) => {
     }
   }, [id, onMount, ref])
 
-  const classList = useMemo(() => classNames('bi bi-diagram-port', {
-    ['bi-diagram-port-default']: !render,
-  }, className), [className, render])
-  const customRenderProps = { ref, id, direction: alignment, type, className }
+  const classList = useMemo(() => classNames('bi bi-diagram-port bi-diagram-port-default', className), [className])
 
-  if (render && typeof render === 'function') return render(customRenderProps)
-  else return <div
+  return <div
     className={classList} data-port-id={id} key={id} ref={ref} {...rest}
   />
 }
 
-Port.propTypes = {
-  id: PropTypes.oneOfType([PropTypes.string, PropTypes.symbol]).isRequired,
-  type: PropTypes.oneOf(['input', 'output']).isRequired,
-  render: PropTypes.func,
-  onDragNewSegment: PropTypes.func,
-  onSegmentFail: PropTypes.func,
-  onSegmentConnect: PropTypes.func,
-  canLink: PropTypes.func,
-  onMount: PropTypes.func,
-  alignment: PropTypes.oneOf(['right', 'left', 'top', 'bottom']),
-}
-
-Port.defaultProps = {
-  render: undefined,
+DiagramPort.defaultProps = {
   onDragNewSegment: undefined,
   onSegmentFail: undefined,
   onSegmentConnect: undefined,
@@ -80,4 +67,4 @@ Port.defaultProps = {
   alignment: undefined,
 }
 
-export default React.memo(Port)
+export default React.memo(DiagramPort)

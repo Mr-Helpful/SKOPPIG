@@ -1,3 +1,5 @@
+import { PortAlignment } from "../Types-ts"
+
 const CURVE_FACTOR = 60
 
 /**
@@ -6,24 +8,22 @@ const CURVE_FACTOR = 60
 const roundPoint = (point: [number, number]): [number, number] =>
   [Math.floor(point[0]), Math.floor(point[1])]
 
-export type Alignment = 'left' | 'right' | 'top' | 'bottom'
-
 /**
  * Calculates the offset accordingly to the alignment
  */
-const getXOffset = (alignment: Alignment) => {
+const getXOffset = (alignment: PortAlignment) => {
   if (!alignment || (alignment !== 'left' && alignment !== 'right')) return 0
   return alignment === 'left' ? -CURVE_FACTOR : CURVE_FACTOR
 }
-const getYOffset = (alignment: Alignment) => {
+const getYOffset = (alignment: PortAlignment) => {
   if (!alignment || (alignment !== 'top' && alignment !== 'bottom')) return 0
   return alignment === 'top' ? -CURVE_FACTOR : CURVE_FACTOR
 }
 
 type Options = {
   type: string
-  inputAlignment?: Alignment
-  outputAlignment?: Alignment
+  inputAlignment?: PortAlignment
+  outputAlignment?: PortAlignment
 }
 
 /**

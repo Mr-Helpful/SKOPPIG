@@ -1,4 +1,4 @@
-import { ElementType, ReactNode } from "react"
+import { ReactNode } from "react"
 
 /** Link type */
 export type Link = {
@@ -41,10 +41,10 @@ export type NodeRender = (
     inputs: ReactNode[]
     outputs: ReactNode[]
   }
-) => ElementType | ReactNode
+) => ReactNode
 
 /** Schema type */
 export type Schema = {
   nodes: Node[]
-  links?: Link[]
+  links: Link[]
 }

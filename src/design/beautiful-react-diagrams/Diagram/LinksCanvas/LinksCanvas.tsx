@@ -1,16 +1,23 @@
 import React, { useCallback } from 'react'
-import PropTypes from 'prop-types'
-import DiagramLink from '../Link/Link'
-import Segment from '../Segment/Segment'
-import { LinkType, NodeType, PortAlignment } from '../../shared/Types'
+import DiagramLink from '../Link/DiagramLink'
+import DiagramSegment from '../Segment/DiagramSegment'
 import findInvolvedEntity from './findInvolvedEntity'
 import removeLinkFromArray from './removeLinkFromArray'
+import { Segment } from '../Segment/DiagramSegment'
+import { Node, Link } from '../../shared/Types-ts'
+
+interface LinksCanvasProps {
+  nodes: Node[]
+  segment: Segment
+  onChange: (links: Link[]) => void
+  links: Link[]
+}
 
 /**
  * Handles the links' events and business logic, wraps the links within a svg
  */
-const LinksCanvas = (props) => {
-  const { nodes, segment, onChange, links, onClick } = props
+const LinksCanvas = (props: LinksCanvasProps) => {
+  const { nodes, segment, onChange, links } = props
 
   const removeFromLinksArray = useCallback((link) => {
     if (links.length > 0 && onChange) {
@@ -20,34 +27,23 @@ const LinksCanvas = (props) => {
   }, [links, onChange])
 
   return (
-    <svg onClick={onClick} className="bi bi-link-canvas-layer">
-      {links && links.length > 0 && links.map((link) => (
-        <DiagramLink
-          link={link}
-          input={findInvolvedEntity(nodes, link.input)}
-          output={findInvolvedEntity(nodes, link.output)}
-          onDelete={removeFromLinksArray}
-          key={`${link.input}-${link.output}`}
-        />
-      ))}
+    <svg className="bi bi-link-canvas-layer">
+      {links && links.length > 0 && links.map((link) => {
+        return (
+          <DiagramLink
+            link={link}
+            input={findInvolvedEntity(nodes, link.input)}
+            output={findInvolvedEntity(nodes, link.output)}
+            onDelete={removeFromLinksArray}
+            key={`${link.input}-${link.output}`}
+          />
+        )
+      })}
       {segment && (
-        <Segment {...segment} />
+        <DiagramSegment {...segment} />
       )}
     </svg>
   )
-}
-
-LinksCanvas.propTypes = {
-  nodes: PropTypes.arrayOf(NodeType),
-  links: PropTypes.arrayOf(LinkType),
-  segment: PropTypes.exact({
-    id: PropTypes.string,
-    from: PropTypes.arrayOf(PropTypes.number),
-    to: PropTypes.arrayOf(PropTypes.number),
-    alignment: PortAlignment,
-  }),
-  onChange: PropTypes.func,
-  onClick: PropTypes.func,
 }
 
 LinksCanvas.defaultProps = {

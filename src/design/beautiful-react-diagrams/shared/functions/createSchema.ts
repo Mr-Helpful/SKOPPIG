@@ -4,7 +4,7 @@ import { validateSchema } from './validators'
 /**
  * takes a schema draft and ensure it is a valid schema
  */
-const createSchema = (schema) => {
+const createSchema = (schema: any) => {
   const next = { ...schema }
 
   next.nodes ||= []

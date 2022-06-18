@@ -91,8 +91,8 @@ type Handler = (
  * }
  * ```
  */
-const useDrag = (options: Options = defaultOptions) => {
-  const targetRef = useRef(undefined); // the target draggable element
+const useDrag = <P extends HTMLElement>(options: Options = defaultOptions) => {
+  const targetRef = useRef<P>(undefined); // the target draggable element
   const dragStartHandlerRef = useRef<Handler>(); // a ref to user's onDragStart handler
   const dragHandlerRef = useRef<Handler>(); // a ref to user's onDrag handler
   const dragEndHandlerRef = useRef<Handler>(); // a ref to user's onDragEnd handler

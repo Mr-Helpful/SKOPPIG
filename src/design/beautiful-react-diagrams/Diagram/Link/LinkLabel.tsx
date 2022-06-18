@@ -1,20 +1,19 @@
-import React from 'react'
-import PropTypes from 'prop-types'
+import React, { ReactNode } from 'react'
+
+interface LinkLabelProps {
+  label?: ReactNode
+  position: [number, number]
+}
 
 /**
  * Diagram link label
  */
-const LinkLabel = ({ label, position }) => (
+const LinkLabel = ({ label, position }: LinkLabelProps) => (
   <foreignObject x={position[0]} y={position[1]}>
     <div className="bi-diagram-link-label">
       {label}
     </div>
   </foreignObject>
 )
-
-LinkLabel.propTypes = {
-  label: PropTypes.string.isRequired,
-  position: PropTypes.arrayOf(PropTypes.number).isRequired,
-}
 
 export default React.memo(LinkLabel)

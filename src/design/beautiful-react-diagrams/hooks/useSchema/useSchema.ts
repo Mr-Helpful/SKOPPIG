@@ -2,7 +2,7 @@ import { useReducer, useCallback, Reducer } from 'react'
 import ensureNodeId from '../../shared/functions/ensureNodeId'
 import schemaReducer from './schemaReducer'
 import { ON_CHANGE, ON_CONNECT, ON_NODE_ADD, ON_NODE_REMOVE } from './actionTypes'
-import { Schema, Node, Link } from '../../shared/Types-ts'
+import { Schema, Node } from '../../shared/Types-ts'
 
 const initialState = { nodes: [], links: [] }
 

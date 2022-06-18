@@ -1,8 +1,18 @@
 import React from 'react'
-import Port from '../Port/Port'
+import { Port, PortAlignment } from '../../shared/Types-ts'
+import DiagramPort from '../Port/Port'
 
-const portGenerator = ({ registerPort, onDragNewSegment, onSegmentFail, onSegmentConnect }, type) => function PortGen(port) {
-  return <Port
+interface GeneratorProps {
+  registerPort: (id: string, el: HTMLElement) => void
+  onDragNewSegment: (id: string, from: [number, number], to: [number, number], alignment: PortAlignment) => void
+  onSegmentFail: (id: string, type: 'input' | 'output') => void
+  onSegmentConnect: (input: string, output: string, type: 'input' | 'output') => void
+}
+
+const portGenerator = ({
+  registerPort, onDragNewSegment, onSegmentFail, onSegmentConnect
+}: GeneratorProps, type: 'input' | 'output') => function PortGen(port: Port) {
+  return <DiagramPort
     {...port}
     onMount={registerPort}
     onDragNewSegment={onDragNewSegment}
