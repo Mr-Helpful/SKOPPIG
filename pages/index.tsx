@@ -5,7 +5,7 @@ import styles from '../styles/Home.module.css'
 // import { ChakraProvider } from '@chakra-ui/react'
 import { BigStack } from '../src/brush/BigStack'
 import { BrushTree } from '../src/brush/BrushTree'
-import { BrushDiagram } from '../src/design/testing/BrushDiagram'
+import { BrushDiagram } from '../src/DesignMenu/BrushDiagram'
 
 export default function Home() {
   return (<div className={styles.container}>

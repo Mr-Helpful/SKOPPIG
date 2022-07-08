@@ -34,3 +34,6 @@ yarn-error.log*
 # I'm currently using a folder called _Trash for anything I'm pretty sure I
 # don't need now, but might need to reference at some point
 /_Trash
+
+# because package.json gives enough info on the current requirements
+package-lock.json
