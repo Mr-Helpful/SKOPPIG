@@ -8,7 +8,6 @@ const TwoStack = ({ children }) => {
 }
 
 export const BigStack = ({ children, depth = 0 }) => {
-  let component = children
-  while (depth--) component = <TwoStack>{component}</TwoStack>
-  return component
+  while (depth--) children = <TwoStack>{children}</TwoStack>
+  return children
 }

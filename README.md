@@ -11,6 +11,12 @@ The site can be separated into two main 'pages':
 
 ### A Canvas page
 
+This page is where the actual drawing is done, making use of the brushes created
+
+The main tools can be split into two categories:
+
+#### Brush tools
+
 ### A Design page
 
 This page is dedicated to designing custom brushes via a node based system
@@ -20,10 +26,8 @@ This page is dedicated to designing custom brushes via a node based system
 The node system primarily uses [beautiful-react-diagrams](https://github.com/antonioru/beautiful-react-diagrams) with the following edits made:
 
 - Typescript typing has been introduced for schema components
-  - TODO: completely incorporate these types into components
 - Additional config options have been added to the Diagram element
 - Multiple graph algorithms have been added to the shared functions, to allow for folding of nodes
-  - TODO: complete node folding implementation
 - Added options to provide custom port rendering (both via custom classNames and custom render functions)
 
 The code for this modified version can be found in the `./src/design/beautiful-react-diagrams` directory

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { Diagram, useSchema, createSchema } from './beautiful-react-diagrams'
+import { Diagram, useSchema, createSchema } from '../../lib/beautiful-react-diagrams'
 import { CustomNode } from './CustomElems'
 import {
   childrenOf,
@@ -7,8 +7,8 @@ import {
   exposedPorts,
   rootsIn,
   splitSchema
-} from "./beautiful-react-diagrams/shared/functions/schemaMethods"
-import { Schema, Node } from './beautiful-react-diagrams/shared/Types'
+} from "../../lib/beautiful-react-diagrams/shared/functions/schemaMethods"
+import { Schema, Node } from '../../lib/beautiful-react-diagrams/shared/Types'
 import styles from './CustomElems.module.scss'
 
 export const BrushDiagram = (initialSchema) => {
@@ -47,8 +47,7 @@ export const BrushDiagram = (initialSchema) => {
     const selNode = schema.nodes.find(node => node.id === id)
 
     // split up the schema and calculate the exposed ports
-    const ids = collapsibleFrom([id], schema)
-    ids.add(id)
+    const ids = collapsibleFrom([id], schema).add(id)
     const { inSchema, outSchema } = splitSchema(ids, schema)
     const ports = exposedPorts(ids, schema)
 

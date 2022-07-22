@@ -49,16 +49,17 @@ export abstract class BrushNode {
           throw new Error("render method not implemented")
       }
     } catch (e) {
-      console.log(e)
+      console.error(e)
       this.renderFailure(destination)
     }
   }
 
   menu(props) {
     return <HStack>
-
+      <BsImage />
     </HStack>
   }
 }
 
-export { NoiseNode, PerlinNode } from './randomNode'
+export * from './randomNode'
+export * from './sourceNode'

@@ -4,7 +4,7 @@ interface DAGNode {
   brush: BrushNode
   parents: { [key: number]: boolean }
   children: number[]
-  seen: boolean
+  displayed: boolean
 }
 
 export class DAGBrush {
@@ -19,7 +19,7 @@ export class DAGBrush {
         brush: node,
         parents: {},
         children: new Array(node.noSources).fill(-1),
-        seen: false
+        displayed: false
       }
     })
   }
@@ -35,6 +35,12 @@ export class DAGBrush {
     this.dag[k].parents[i] = true
   }
 
+  /**
+   * Removes a link between nodes in the DAG
+   * @param i The prior parent node
+   * @param j The source point on the parent node
+   * @param k The prior child node for the link
+   */
   unlink(i, j, k) {
     this.dag[i].children[j] = -1
     delete this.dag[k].parents[i]
@@ -42,8 +48,8 @@ export class DAGBrush {
 
   /** Select all nodes that **only** contribute to node i */
   selectFrom(i) {
-    this.dag.forEach(node => { node.seen = false })
-    this.dag[i].seen = true
+    this.dag.forEach(node => { node.displayed = false })
+    this.dag[i].displayed = true
 
     let queue = [this.dag[i].children]
     while (queue.length) {
@@ -53,9 +59,9 @@ export class DAGBrush {
         if (!node) continue
 
         // if all parents have been seen, mark the node seen
-        node.seen = Object.keys(node.parents)
-          .every(j => this.dag[j].seen)
-        if (node.seen) queue.push(node.children)
+        node.displayed = Object.keys(node.parents)
+          .every(j => this.dag[j].displayed)
+        if (node.displayed) queue.push(node.children)
       }
     }
   }
