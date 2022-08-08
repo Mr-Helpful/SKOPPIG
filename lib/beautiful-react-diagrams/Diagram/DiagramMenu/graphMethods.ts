@@ -1,5 +1,5 @@
-import { Schema } from "../Types"
-import { intersect, toArray } from "./setMethods"
+import { Schema } from '../../shared/Types'
+import { intersect } from './setMethods'
 
 type Graph = { [id: string]: string[] }
 
@@ -12,12 +12,14 @@ type Graph = { [id: string]: string[] }
  *  ...,
  *  [n9.id]: [n0.id, n4.id, ..., n1.id]}
  * ```
- * 
+ *
  * @param schema The schema to convert from
  * @return The linked list representation
  */
 export const toGraph = (schema: Schema): Graph => {
-  let graph = {}, inPorts = {}, outPorts = {}
+  let graph = {},
+    inPorts = {},
+    outPorts = {}
   for (const node of schema.nodes) {
     graph[node.id] = []
     for (const port of node.inputs || []) inPorts[port.id] = node.id
@@ -39,7 +41,7 @@ export const toGraph = (schema: Schema): Graph => {
 /**
  * Uses a breadth search to find all direct descendants of nodes
  * (importantly, this doesn't include the nodes themselves)
- * 
+ *
  * @param id The id of the node to search from
  * @param graph The linked list graph to search within
  * @return The ids of all direct descendants

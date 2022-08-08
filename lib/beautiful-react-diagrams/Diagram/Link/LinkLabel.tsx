@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react'
+import { defaultContent } from '../../shared/Types'
 
 interface LinkLabelProps {
   label?: ReactNode
@@ -8,11 +9,9 @@ interface LinkLabelProps {
 /**
  * Diagram link label
  */
-const LinkLabel = ({ label, position }: LinkLabelProps) => (
+const LinkLabel = ({ label = defaultContent, position }: LinkLabelProps) => (
   <foreignObject x={position[0]} y={position[1]}>
-    <div className="bi-diagram-link-label">
-      {label}
-    </div>
+    <div className="bi-diagram-link-label">{label}</div>
   </foreignObject>
 )
 

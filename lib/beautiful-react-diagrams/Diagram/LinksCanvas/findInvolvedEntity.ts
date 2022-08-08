@@ -1,4 +1,4 @@
-import { Port, Node } from "../../shared/Types"
+import { Port, Node } from '../../shared/Types'
 
 export interface NodeEntity {
   type: 'node'
@@ -12,26 +12,20 @@ export interface PortEntity {
 
 export type DiagramEntity = NodeEntity | PortEntity
 
-/**
- * Given an array of nodes and an id, returns the involved port/node
- */
-const findInvolvedEntity = (nodes: Node[] | Port[], entityId: string, type: 'node' | 'port' = 'node'): NodeEntity | PortEntity => {
-  let result = undefined
-  let index = 0
-
-  while (index < nodes.length && !result) {
-    const node = nodes[index]
-
-    if (node.id === entityId) {
-      result = { type, entity: { ...node } }
-    } else if ('inputs' in node && 'outputs' in node) {
-      result = findInvolvedEntity(node.inputs, entityId, 'port') || findInvolvedEntity(node.outputs, entityId, 'port')
+const findInvolvedEntity = (
+  nodes: Node[],
+  id: string
+): NodeEntity | PortEntity => {
+  for (const node of nodes) {
+    if (node.id === id) return { type: 'node', entity: { ...node } }
+    for (const port of node.inputs ?? []) {
+      if (port.id === id) return { type: 'port', entity: { ...port } }
     }
-
-    index += 1
+    for (const port of node.outputs ?? []) {
+      if (port.id === id) return { type: 'port', entity: { ...port } }
+    }
   }
-
-  return result
+  throw new TypeError(`cannot find '${id}' in schema`)
 }
 
 export default findInvolvedEntity

@@ -11,8 +11,7 @@ export interface Segment {
 /**
  * Segment
  */
-const DiagramSegment = (props: Segment) => {
-  const { from, to, alignment } = props
+const DiagramSegment = ({ from, to, alignment }: Segment) => {
   const path = useMemo(() => {
     const pathOptions = { type: 'bezier', inputAlignment: alignment }
     return makeSvgPath(from, to, pathOptions)
@@ -24,10 +23,6 @@ const DiagramSegment = (props: Segment) => {
       <circle r="6.5" cx={to[0]} cy={to[1]} />
     </g>
   )
-}
-
-DiagramSegment.defaultProps = {
-  alignment: undefined
 }
 
 export default React.memo(DiagramSegment)

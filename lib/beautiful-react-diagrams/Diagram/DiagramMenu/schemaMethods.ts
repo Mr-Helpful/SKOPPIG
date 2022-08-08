@@ -1,6 +1,6 @@
-import { Schema, Node, Link, Port } from "../Types"
-import { difference, toArray } from "./setMethods"
-import { graphChildren, toGraph, graphRoots, graphRootsFrom } from "./graphMethods"
+import { Schema, Node, Link, Port } from '../../shared/Types'
+import { difference, toArray } from './setMethods'
+import { graphChildren, toGraph, graphRootsFrom } from './graphMethods'
 
 /** All descendants of nodes within a schema */
 export const childrenOf = (ids: string[], schema: Schema): Set<string> => {
@@ -18,22 +18,25 @@ export const cycleWith = (ids: string[], schema: Schema): boolean => {
   return ids.every(id => children.has(id))
 }
 
-/** Finds **all** roots in a schema */
-export const rootsIn = (schema: Schema): Set<string> => {
-  return graphRoots(toGraph(schema))
-}
+// /** Finds **all** roots in a schema */
+// export const rootsIn = (schema: Schema): Set<string> => {
+//   return graphRoots(toGraph(schema))
+// }
 
-/** Finds all roots in a schema accessible from nodes */
-export const rootsFrom = (ids: string[], schema: Schema): Set<string> => {
-  return graphRootsFrom(ids, toGraph(schema))
-}
+// /** Finds all roots in a schema accessible from nodes */
+// export const rootsFrom = (ids: string[], schema: Schema): Set<string> => {
+//   return graphRootsFrom(ids, toGraph(schema))
+// }
 
 /**
  * Uses a breadth first search to find all nodes
  * that **only** contribute to the given node
  */
 export const collapsibleFrom = (ids: string[], schema: Schema): Set<string> => {
+  // console.group('collapsibleFrom')
+  // console.log(schema)
   const graph = toGraph(schema)
+  // console.log(graph)
 
   // nodes accessible from the id
   const children1 = graphChildren(ids, graph)
@@ -44,16 +47,9 @@ export const collapsibleFrom = (ids: string[], schema: Schema): Set<string> => {
   const children2 = graphChildren(toArray(rootSet), graph)
 
   // nodes only accessible via specified nodes
-  return difference(children1, children2)
-}
-
-/**
- * Calculates the minimum set of ids that can be collapsed
- * to acheive the same effect as collapsing all specified ids
- */
-export const minimalCollapsible = (ids: string[], schema: Schema): Set<string> => {
-  const collapsible = collapsibleFrom(ids, schema)
-  return difference(new Set(ids), collapsible)
+  const res = difference(children1, children2)
+  // console.groupEnd()
+  return res
 }
 
 /**
@@ -72,7 +68,7 @@ export const minimalCollapsible = (ids: string[], schema: Schema): Set<string> =
  > { port2: "node1", port3: "node1" }
  * ```
  */
-const portToNode = (schema: Schema): { [portId: string]: string; } => {
+const portToNode = (schema: Schema): { [portId: string]: string } => {
   let outMap = {}
   for (const node of schema.nodes) {
     for (const port of node.outputs) outMap[port.id] = node.id
@@ -105,21 +101,27 @@ const portToNode = (schema: Schema): { [portId: string]: string; } => {
  * ```
  */
 export const exposedPorts = (ids: Set<string>, schema: Schema): Port[] => {
+  // console.group('exposedPorts')
   const portMap = portToNode(schema)
   const nodes = schema.nodes.filter(node => ids.has(node.id))
   const ports = nodes.map(node => node.inputs).flat()
-  return ports.filter(({ id }) => !ids.has(portMap[id]))
+  const res = ports.filter(({ id }) => !ids.has(portMap[id]))
+  // console.log(ports)
+  // console.groupEnd()
+  return res
 }
 
 /**
  * Splits nodes into internal nodes and other nodes
  */
 const splitNodes = (
-  ids: Set<string>, schema: Schema
-): { inNodes: Node[]; outNodes: Node[]; } => {
-  let inNodes = [], outNodes = []
+  ids: Set<string>,
+  schema: Schema
+): { inNodes: Node[]; outNodes: Node[] } => {
+  let inNodes = [],
+    outNodes = []
   for (const node of schema.nodes) {
-    (ids.has(node.id) ? inNodes : outNodes).push(node)
+    ;(ids.has(node.id) ? inNodes : outNodes).push(node)
   }
   return { inNodes, outNodes }
 }
@@ -129,19 +131,25 @@ const splitNodes = (
  * with reference to a set of nodes
  */
 const splitLinks = (
-  ids: Set<string>, schema: Schema
-): { inLinks: Link[]; outLinks: Link[]; } => {
-  let inPorts = {}, outPorts = {}
-  for (const node of schema.nodes) if (ids.has(node.id)) {
-    for (const port of node.inputs) inPorts[port.id] = node.id
-    for (const port of node.outputs) outPorts[port.id] = node.id
-  }
+  ids: Set<string>,
+  schema: Schema
+): { inLinks: Link[]; outLinks: Link[] } => {
+  let inPorts = {},
+    outPorts = {}
+  for (const node of schema.nodes)
+    if (ids.has(node.id)) {
+      for (const port of node.inputs) inPorts[port.id] = node.id
+      for (const port of node.outputs) outPorts[port.id] = node.id
+    }
 
-  let inLinks = [], outLinks = []
+  let inLinks = [],
+    outLinks = []
   for (const link of schema.links) {
-    (((link.input in inPorts && link.output in outPorts) ||
-      (link.output in inPorts && link.input in outPorts)
-    ) ? inLinks : outLinks).push(link)
+    ;((link.input in inPorts && link.output in outPorts) ||
+    (link.output in inPorts && link.input in outPorts)
+      ? inLinks
+      : outLinks
+    ).push(link)
   }
   return { inLinks, outLinks }
 }
@@ -151,29 +159,36 @@ const splitLinks = (
  * based on the provided set of nodes
  */
 export const splitSchema = (
-  ids: Set<string>, schema: Schema
-): { inSchema: Schema; outSchema: Schema; } => {
+  ids: Set<string>,
+  schema: Schema
+): { inSchema: Schema; outSchema: Schema } => {
+  // console.group('splitSchema')
   const { inNodes, outNodes } = splitNodes(ids, schema)
   const { inLinks, outLinks } = splitLinks(ids, schema)
-  return {
+  const res = {
     inSchema: { nodes: inNodes, links: inLinks },
-    outSchema: { nodes: outNodes, links: outLinks }
+    outSchema: { nodes: outNodes, links: outLinks },
+  }
+  // console.groupEnd()
+  return res
+}
+
+/** Finds all currently selected nodes in the schema */
+export const selectedIds = (schema: Schema): string[] => {
+  const selected = schema.nodes
+    .filter(node => node.selected)
+    .map(node => node.id)
+  return selected
+}
+
+/** Selects all nodes in a schema from a given set */
+export const selectIn = (ids: Set<string>, schema: Schema): Schema => {
+  return {
+    nodes: schema.nodes.map(node => {
+      if (ids.has(node.id)) {
+        return { ...node, selected: true }
+      } else return node
+    }),
+    links: schema.links,
   }
 }
-
-const getSelectedIds = (schema: Schema): string[] => {
-  return schema.nodes.filter(node => node.selected).map(node => node.id)
-}
-
-const select = (
-  ids: Set<string>, { nodes, links }: Schema, single: boolean
-): Schema => ({
-  nodes: nodes.map(node => {
-    if (ids.has(node.id)) {
-      return { ...node, selected: true }
-    } else if (single) {
-      return { ...node, selected: false }
-    } else return node
-  }),
-  links
-})

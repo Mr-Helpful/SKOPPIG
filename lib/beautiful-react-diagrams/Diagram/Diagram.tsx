@@ -1,9 +1,47 @@
-import React, { useCallback, useState, useRef, useEffect, HTMLAttributes } from 'react'
+import React, {
+  useCallback,
+  useState,
+  useRef,
+  useEffect,
+  HTMLAttributes,
+} from 'react'
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
+import DiagramMenu from './DiagramMenu/DiagramMenu'
 import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
 
-import { Link, Node, PortAlignment, Schema, ElementObject } from '../shared/Types'
+import {
+  Link,
+  Node,
+  PortAlignment,
+  Schema,
+  ElementObject,
+  defaultSchema,
+  vacuouslyTrue,
+} from '../shared/Types'
+
+/** Returns a state variable which represents whether target key is pressed */
+const useKeyDown = (target: string): boolean => {
+  let [down, setDown] = useState(false)
+  const onUp = useCallback<(ev: KeyboardEvent) => void>(
+    ({ key }) => key === target && setDown(false),
+    [target]
+  )
+  const onDown = useCallback<(ev: KeyboardEvent) => void>(
+    ({ key }) => key === target && setDown(true),
+    [target]
+  )
+
+  useEffect(() => {
+    window.addEventListener('keyup', onUp)
+    window.addEventListener('keydown', onDown)
+    return () => {
+      window.removeEventListener('keyup', onUp)
+      window.removeEventListener('keydown', onDown)
+    }
+  }, [onUp, onDown])
+  return down
+}
 
 type Segment = {
   id: string
@@ -13,27 +51,25 @@ type Segment = {
 }
 
 type Config = {
-  shouldLink: (link: Link, schema: Schema) => boolean
-  onCanvasClick: (schema: Schema) => void
+  /** A ref to fill with a debug callback */
+  display?: { show: () => void }
+  /** Whether a link should be added to the schema */
+  shouldLink?: (link: Link, schema: Schema) => boolean
 }
 
-const defaultConfig: Config = {
-  shouldLink: (link, schema) => !schema.links.some(l =>
-    l.input === link.input && l.output === link.output
-  ),
-  onCanvasClick: () => { }
-}
+// An unused display object to fill
+const defaultDisplay: Config['display'] = { show: () => {} }
 
-interface DiagramProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
+interface DiagramProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /**
    * The diagram current schema
    */
-  schema: Schema
+  schema?: Schema
   /**
    * The callback to be performed every time the model changes
    */
-  onChange: (schema: Partial<Schema>) => void
-  display?: { show: () => void }
+  onChange?: (schema: Partial<Schema>) => void
   /**
    * Additional diagram config
    */
@@ -47,16 +83,19 @@ interface DiagramProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> 
  * with the user.
  * `config` prop for additional control over the logic of the diagram.
  */
-const Diagram = (props: DiagramProps) => {
-  const { schema, onChange, display, config: userConfig, ...rest } = props
-  const config = { ...defaultConfig, ...userConfig }
+const Diagram = ({
+  schema = defaultSchema,
+  onChange = undefined,
+  config: { display = defaultDisplay, shouldLink = vacuouslyTrue } = {},
+  ...rest
+}: DiagramProps) => {
   const [segment, setSegment] = useState<Segment>()
   const { current: portElems } = useRef<ElementObject>({}) // keeps the port elements references
   const { current: nodeElems } = useRef<ElementObject>({}) // keeps the node elements references
 
   useEffect(() => {
     display.show = () => {
-      console.log("%cNew references", "color: green")
+      console.log('%cNew references', 'color: green')
       for (let id in portElems) {
         console.log(id)
         console.log(portElems[id])
@@ -74,30 +113,43 @@ const Diagram = (props: DiagramProps) => {
   }
 
   // when a port is registered, save it to the local reference
-  const onPortRegister = useCallback((portId: string, portEl: HTMLElement) => {
-    portElems[portId] = portEl
-  }, [portElems])
+  const onPortRegister = useCallback(
+    (portId: string, portEl: HTMLElement) => {
+      portElems[portId] = portEl
+    },
+    [portElems]
+  )
 
   // when a node is registered, save it to the local reference
-  const onNodeRegister = useCallback((nodeId: string, nodeEl: HTMLElement) => {
-    nodeElems[nodeId] = nodeEl
-  }, [nodeElems])
+  const onNodeRegister = useCallback(
+    (nodeId: string, nodeEl: HTMLElement) => {
+      nodeElems[nodeId] = nodeEl
+    },
+    [nodeElems]
+  )
 
   // when a node is deleted, remove its references
-  const onNodeRemove = useCallback((
-    nodeId: string, inputsPorts: string[], outputsPorts: string[]
-  ) => {
-    delete nodeElems[nodeId]
-    inputsPorts.forEach(input => delete portElems[input])
-    outputsPorts.forEach(output => delete portElems[output])
-  }, [nodeElems, portElems])
+  const onNodeRemove = useCallback(
+    (nodeId: string, inputsPorts: string[], outputsPorts: string[]) => {
+      delete nodeElems[nodeId]
+      inputsPorts.forEach(input => delete portElems[input])
+      outputsPorts.forEach(output => delete portElems[output])
+    },
+    [nodeElems, portElems]
+  )
 
   // when a new segment is dragged, save it to the local state
-  const onDragNewSegment = useCallback((
-    portId: string, from: [number, number], to: [number, number], alignment: PortAlignment
-  ) => {
-    setSegment({ id: `segment-${portId}`, from, to, alignment })
-  }, [])
+  const onDragNewSegment = useCallback(
+    (
+      portId: string,
+      from: [number, number],
+      to: [number, number],
+      alignment: PortAlignment
+    ) => {
+      setSegment({ id: `segment-${portId}`, from, to, alignment })
+    },
+    []
+  )
 
   // when a segment fails to connect, reset the segment state
   const onSegmentFail = useCallback(() => {
@@ -107,7 +159,7 @@ const Diagram = (props: DiagramProps) => {
   // when a segment connects, update the links schema, perform the onChange callback
   // with the new data, then reset the segment state
   const onSegmentConnect = (input: string, output: string) => {
-    if (config.shouldLink({ input, output }, schema)) {
+    if (shouldLink({ input, output }, schema)) {
       const nextLinks: Link[] = [...(schema.links || []), { input, output }]
       if (onChange) onChange({ links: nextLinks })
     }
@@ -119,8 +171,22 @@ const Diagram = (props: DiagramProps) => {
     if (onChange) onChange({ links: nextLinks })
   }
 
+  // whether to select multiple nodes at once
+  const multiSelect = useKeyDown('Shift')
+  const onNodeSelect = (id: string) => {
+    if (onChange) {
+      const nodes = schema.nodes.map(node => {
+        if (node.id === id) return { ...node, selected: !node.selected }
+        else if (multiSelect) return node
+        else return { ...node, selected: false }
+      })
+      onChange({ nodes })
+    }
+  }
+
   return (
     <DiagramCanvas portRefs={portElems} nodeRefs={nodeElems} {...rest}>
+      <DiagramMenu schema={schema} onChange={onChange} />
       <NodesCanvas
         nodes={schema.nodes}
         onChange={onNodesChange}
@@ -130,17 +196,17 @@ const Diagram = (props: DiagramProps) => {
         onDragNewSegment={onDragNewSegment}
         onSegmentFail={onSegmentFail}
         onSegmentConnect={onSegmentConnect}
+        onNodeSelect={onNodeSelect}
       />
-      <LinksCanvas nodes={schema.nodes} links={schema.links} segment={segment} onChange={onLinkDelete} />
+      <LinksCanvas
+        nodes={schema.nodes}
+        links={schema.links}
+        segment={segment}
+        onChange={onLinkDelete}
+        onNodeSelect={onNodeSelect}
+      />
     </DiagramCanvas>
   )
-}
-
-Diagram.defaultProps = {
-  schema: { nodes: [], links: [] },
-  onChange: undefined,
-  display: { show: () => { } },
-  config: {}
 }
 
 export default React.memo(Diagram)

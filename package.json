@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:e2e": "npx playwright test",
     "analyse": "cross-env ANALYZE=true next build"
   },
   "dependencies": {
@@ -15,9 +16,12 @@
     "@emotion/styled": "^11.8.1",
     "@fseehawer/react-circular-slider": "^2.5.0",
     "@next/bundle-analyzer": "^12.1.6",
-    "beautiful-react-diagrams": "^0.5.1",
+    "@testing-library/react": "^13.3.0",
+    "@types/node": "^18.0.6",
+    "beautiful-react-hooks": "^3.7.0",
+    "classnames": "^2.3.1",
     "cross-env": "^7.0.3",
-    "framer-motion": "^6.3.3",
+    "framer-motion": "^6.5.1",
     "next": "12.1.5",
     "node-sass": "^7.0.1",
     "react": "^18.0.0",
@@ -28,8 +32,10 @@
     "underscore": "^1.13.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.24.1",
     "@types/react": "^18.0.8",
     "eslint": "8.14.0",
-    "eslint-config-next": "12.1.5"
+    "eslint-config-next": "12.1.5",
+    "typescript": "^4.7.4"
   }
 }

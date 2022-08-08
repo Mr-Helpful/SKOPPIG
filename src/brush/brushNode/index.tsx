@@ -7,20 +7,25 @@ export abstract class BrushNode {
   dimensions: [number, number] = [0, 0]
   translation: [number, number] = [0, 0]
 
-  // need to be implemented
+  // how many sources should be provided for a render
+  // needs to be implemented
   abstract noSources: number
 
-  abstract renderCPU(
+  // a fallback rendering method for when gpu rendering
+  // is either not possible or not implemented
+  // should be implemented
+  renderCPU?(
     sources: CanvasRenderingContext2D[],
     destination: CanvasRenderingContext2D
   ): void
 
   // renderGPU can be implemented in the future,
   // but is only really required for fast, compiled code
-  renderGPU: ((
+  // can be implemented
+  renderGPU?(
     sources: CanvasRenderingContext2D[],
     destination: CanvasRenderingContext2D
-  ) => void) | undefined = undefined
+  ): void
 
   // wraps together the render methods
   renderFailure(destination: CanvasRenderingContext2D): void {
@@ -31,22 +36,22 @@ export abstract class BrushNode {
   render(
     sources: CanvasRenderingContext2D[],
     destination: CanvasRenderingContext2D,
-    mode: "cpu" | "gpu" | string = "cpu"
+    mode: 'cpu' | 'gpu' | string = 'cpu'
   ) {
     try {
       switch (mode) {
-        case "gpu":
+        case 'gpu':
           if (this.renderGPU) {
             this.renderGPU(sources, destination)
             break
           }
-        case "cpu":
+        case 'cpu':
           if (this.renderCPU) {
             this.renderCPU(sources, destination)
             break
           }
         default:
-          throw new Error("render method not implemented")
+          throw new TypeError(`rendering method ${mode} not implemented`)
       }
     } catch (e) {
       console.error(e)
@@ -55,9 +60,11 @@ export abstract class BrushNode {
   }
 
   menu(props) {
-    return <HStack>
-      <BsImage />
-    </HStack>
+    return (
+      <HStack>
+        <BsImage />
+      </HStack>
+    )
   }
 }
 
