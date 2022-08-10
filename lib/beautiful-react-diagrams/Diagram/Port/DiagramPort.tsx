@@ -13,7 +13,7 @@ interface DiagramPortProps
     id: string,
     from: [number, number],
     to: [number, number],
-    alignment: PortAlignment
+    alignment?: PortAlignment
   ) => void
   onSegmentFail: (id: string, type: 'input' | 'output') => void
   onSegmentConnect: (
@@ -28,7 +28,7 @@ const DiagramPort = ({
   // from type Port
   id,
   canLink = vacuouslyTrue,
-  alignment = undefined,
+  alignment,
   className = '',
   // callbacks from parents
   onDragNewSegment,
@@ -46,7 +46,7 @@ const DiagramPort = ({
 
   onDrag((event, info) => {
     event.stopImmediatePropagation()
-    if (onDragNewSegment) {
+    if (canvas !== null && info.start !== null) {
       event.stopImmediatePropagation()
       event.stopPropagation()
       const from = getRelativePoint(info.start, [canvas.x, canvas.y])

@@ -2,11 +2,13 @@ import { createContext } from 'react'
 import { ElementObject } from '../shared/Types'
 
 type ContextValue = {
-  canvas: DOMRect
+  canvas: DOMRect | null
   ports: ElementObject
   nodes: ElementObject
 }
 
 export default createContext<ContextValue>({
-  canvas: null, ports: null, nodes: null
+  canvas: null,
+  ports: {},
+  nodes: {}
 })

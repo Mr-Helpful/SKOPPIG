@@ -38,6 +38,7 @@ export type Node = {
   type?: 'default'
   render?: NodeRender
   className?: string
+  collapsed?: Schema
   data?: any
 }
 
@@ -67,11 +68,11 @@ export type ElementObject = {
 
 export const defaultLink: Link = {
   input: '',
-  output: '',
+  output: ''
 }
 
 export const defaultPort: Port = {
-  id: '',
+  id: ''
 }
 export const defaultPorts: Port[] = []
 
@@ -80,12 +81,12 @@ export const defaultData: any = {}
 
 export const defaultNode: Node = {
   id: '',
-  coordinates: [0, 0],
+  coordinates: [0, 0]
 }
 
 export const defaultSchema: Schema = {
   nodes: [],
-  links: [],
+  links: []
 }
 
 // A generic void returning function for any callbacks

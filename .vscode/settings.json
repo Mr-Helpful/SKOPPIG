@@ -12,9 +12,7 @@
     "**/.factorypath": true,
     "**/.history": true,
     "**/_esy": true,
-    "**/.esy": true,
-    ".next": true,
-    "**/.github": true
+    "**/.esy": true
   },
-  "explorerExclude.backup": null
+  "explorerExclude.backup": {}
 }

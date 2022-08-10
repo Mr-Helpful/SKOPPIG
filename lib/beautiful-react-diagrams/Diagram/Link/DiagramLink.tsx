@@ -21,7 +21,7 @@ interface LinkProps {
  * A Diagram link component displays the link between two diagram nodes or two node ports.
  */
 const DiagramLink = ({ input, output, link, onDelete }: LinkProps) => {
-  const pathRef = useRef()
+  const pathRef = useRef<SVGPathElement>(null)
   const canvas = useCanvas()
   const nodeRefs = useNodeRefs()
   const portRefs = usePortRefs()
@@ -50,8 +50,8 @@ const DiagramLink = ({ input, output, link, onDelete }: LinkProps) => {
     const pathOptions = {
       type:
         input.type === 'port' || output.type === 'port' ? 'bezier' : 'curve',
-      inputAlignment: { alignment: null, ...input.entity }.alignment,
-      outputAlignment: { alignment: null, ...output.entity }.alignment
+      inputAlignment: { alignment: undefined, ...input.entity }.alignment,
+      outputAlignment: { alignment: undefined, ...output.entity }.alignment
     }
     return makeSvgPath(inputPoint, outputPoint, pathOptions)
   }, [

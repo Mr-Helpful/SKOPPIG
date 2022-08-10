@@ -1,5 +1,6 @@
 import { isValidElement } from 'react'
 import ERR from '../Errors'
+import { Schema } from '../Types'
 
 /**
  * Validates a schema port object
@@ -13,7 +14,10 @@ export const validatePort = (port: any): boolean => {
     throw ERR.INVALID_PORT_CAN_LINK(port.id)
   }
 
-  if (!!port.alignment && !['right', 'left', 'top', 'bottom'].includes(port.alignment)) {
+  if (
+    !!port.alignment &&
+    !['right', 'left', 'top', 'bottom'].includes(port.alignment)
+  ) {
     throw ERR.INVALID_PORT_ALIGNMENT(port.id)
   }
 
@@ -28,12 +32,21 @@ export const validateNode = (node: any): boolean => {
     throw ERR.INVALID_ID()
   }
 
-  if (!node.coordinates || (!Array.isArray(node.coordinates) || node.coordinates.length !== 2)) {
+  if (
+    !node.coordinates ||
+    !Array.isArray(node.coordinates) ||
+    node.coordinates.length !== 2
+  ) {
     throw ERR.INVALID_COORDS(node.id)
   }
 
   // eslint-disable-next-line max-len
-  if (!!node.content && (typeof node.content !== 'string' && typeof node.content !== 'function' && !isValidElement(node.content))) {
+  if (
+    !!node.content &&
+    typeof node.content !== 'string' &&
+    typeof node.content !== 'function' &&
+    !isValidElement(node.content)
+  ) {
     throw ERR.INVALID_CONTENT(node.id)
   }
 
@@ -73,7 +86,12 @@ export const validateNodes = (nodes: any[]): boolean => {
  * Validates a single links
  */
 export const validateLink = (link: any): boolean => {
-  if (!link.input || !link.output || typeof link.input !== 'string' || typeof link.output !== 'string') {
+  if (
+    !link.input ||
+    !link.output ||
+    typeof link.input !== 'string' ||
+    typeof link.output !== 'string'
+  ) {
     throw ERR.LINK_INVALID_INPUT_OUTPUT()
   }
 
@@ -100,7 +118,7 @@ export const validateLinks = (links: any[]): boolean => {
 /**
  * Validates the schema object
  */
-export const validateSchema = ({ links, nodes }): boolean => {
+export const validateSchema = ({ links, nodes }: Schema): boolean => {
   if (!nodes) {
     throw ERR.MUST_HAVE_NODES()
   }

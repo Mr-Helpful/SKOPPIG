@@ -1,5 +1,5 @@
 {
-  "name": "skoppig_ts",
+  "name": "skoppig",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,35 +7,42 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:e2e": "npx playwright test",
-    "analyse": "cross-env ANALYZE=true next build"
+    "test:e2e": "playwright test",
+    "analyse": "cross-env ANALYZE=true next build",
+    "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
+    "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
   },
   "dependencies": {
-    "@chakra-ui/react": "^1.8.8",
-    "@emotion/react": "^11.9.0",
-    "@emotion/styled": "^11.8.1",
-    "@fseehawer/react-circular-slider": "^2.5.0",
-    "@next/bundle-analyzer": "^12.1.6",
-    "@testing-library/react": "^13.3.0",
-    "@types/node": "^18.0.6",
-    "beautiful-react-hooks": "^3.7.0",
+    "@chakra-ui/react": "^2.2.6",
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@fseehawer/react-circular-slider": "^2.5.9",
+    "beautiful-react-hooks": "^3.10.0",
     "classnames": "^2.3.1",
-    "cross-env": "^7.0.3",
-    "framer-motion": "^6.5.1",
-    "next": "12.1.5",
-    "node-sass": "^7.0.1",
-    "react": "^18.0.0",
+    "framer-motion": "^7.0.0",
+    "next": "12.2.4",
+    "react": "18.2.0",
     "react-colorful": "^5.5.1",
-    "react-dom": "18.0.0",
+    "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
-    "sass": "^1.51.0",
-    "underscore": "^1.13.3"
+    "sass": "^1.54.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.24.1",
-    "@types/react": "^18.0.8",
-    "eslint": "8.14.0",
-    "eslint-config-next": "12.1.5",
-    "typescript": "^4.7.4"
+    "@babel/core": "^7.18.10",
+    "@chakra-ui/styled-system": "^2.2.5",
+    "@next/bundle-analyzer": "^12.2.4",
+    "@playwright/test": "^1.24.2",
+    "@types/lodash.throttle": "^4.1.7",
+    "@types/node": "18.6.5",
+    "@types/react": "18.0.17",
+    "@types/react-dom": "18.0.6",
+    "cross-env": "^7.0.3",
+    "eslint": "8.21.0",
+    "eslint-config-next": "12.2.4",
+    "global": "^4.4.0",
+    "install-peers": "^1.0.4",
+    "react-router-dom": "^6.3.0",
+    "rxjs": "^7.5.6",
+    "typescript": "4.7.4"
   }
 }

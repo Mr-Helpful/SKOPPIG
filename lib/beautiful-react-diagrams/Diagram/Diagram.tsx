@@ -3,7 +3,7 @@ import React, {
   useState,
   useRef,
   useEffect,
-  HTMLAttributes,
+  HTMLAttributes
 } from 'react'
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
 import DiagramMenu from './DiagramMenu/DiagramMenu'
@@ -17,7 +17,7 @@ import {
   Schema,
   ElementObject,
   defaultSchema,
-  vacuouslyTrue,
+  vacuouslyTrue
 } from '../shared/Types'
 
 /** Returns a state variable which represents whether target key is pressed */
@@ -43,11 +43,11 @@ const useKeyDown = (target: string): boolean => {
   return down
 }
 
-type Segment = {
+export type Segment = {
   id: string
   from: [number, number]
   to: [number, number]
-  alignment: PortAlignment
+  alignment?: PortAlignment
 }
 
 type Config = {
@@ -144,7 +144,7 @@ const Diagram = ({
       portId: string,
       from: [number, number],
       to: [number, number],
-      alignment: PortAlignment
+      alignment?: PortAlignment
     ) => {
       setSegment({ id: `segment-${portId}`, from, to, alignment })
     },
@@ -173,7 +173,7 @@ const Diagram = ({
 
   // whether to select multiple nodes at once
   const multiSelect = useKeyDown('Shift')
-  const onNodeSelect = (id: string) => {
+  const onNodeSelect = (id?: string) => {
     if (onChange) {
       const nodes = schema.nodes.map(node => {
         if (node.id === id) return { ...node, selected: !node.selected }
@@ -201,7 +201,7 @@ const Diagram = ({
       <LinksCanvas
         nodes={schema.nodes}
         links={schema.links}
-        segment={segment}
+        segment={segment!}
         onChange={onLinkDelete}
         onNodeSelect={onNodeSelect}
       />

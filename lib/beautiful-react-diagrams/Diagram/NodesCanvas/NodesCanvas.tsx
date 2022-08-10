@@ -12,7 +12,7 @@ interface NodesCanvasProps {
     id: string,
     from: [number, number],
     to: [number, number],
-    alignment: PortAlignment
+    alignment?: PortAlignment
   ) => void
   onSegmentFail: () => void
   onSegmentConnect: (input: string, output: string) => void
@@ -32,7 +32,7 @@ const NodesCanvas = ({
   onSegmentFail,
   onSegmentConnect,
   onChange,
-  onNodeSelect,
+  onNodeSelect
 }: NodesCanvasProps) => {
   // when a node element updates its position, also change it within the schema
   const onNodePositionUpdate = (nodeId: string, coords: Coords) => {

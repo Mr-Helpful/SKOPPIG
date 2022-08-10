@@ -3,8 +3,8 @@ interface RenderSource {
   sources: (RenderSource | ImageData)[]
   args: any[]
   color: {
-    r: number,
-    g: number,
+    r: number
+    g: number
     b: number
   }
   alpha: number
@@ -13,14 +13,14 @@ interface RenderSource {
 
 /**
  * Renders a single brush image by combining sources
- * 
+ *
  * @param {Object} src
  *  where to obtain the prior image from
  *  if it is an Object, it recursively generates the brush
  * @param  {...any} args
  *  additional arguments to pass to the function handling the operation
  */
-export function Render(src: RenderSource, ...args) {
+export function Render(src: RenderSource, ...args: any[]) {
   // perform a check whether we are delivering the correct
   // number of sources before peforming the recursive portion
   let noSrcs = src.sources.length
@@ -39,13 +39,13 @@ export function Render(src: RenderSource, ...args) {
     const cnv = document.createElement('canvas')
     cnv.width = sub.width
     cnv.height = sub.height
-    
-    const ctx = cnv.getContext('2d')
+
+    const ctx = cnv.getContext('2d')!
     ctx.putImageData(sub, 0, 0)
     return ctx
   })
 
-  const destCtx = document.createElement('canvas').getContext('2d')
+  const destCtx = document.createElement('canvas').getContext('2d')!
 
   // apply the method to merge the rendered sources
   Opject[src.op].operator(rendered, destCtx, ...src.args, ...args)
@@ -60,7 +60,7 @@ interface Operation {
   operator: (
     srcs: CanvasRenderingContext2D[],
     dest: CanvasRenderingContext2D,
-    ...args
+    ...args: any[]
   ) => void
 }
 
@@ -116,8 +116,8 @@ let Opject: Operations = {
       dest.clearRect(0, 0, dw, dh)
 
       // define some constants for the transform matrix
-      const c = Math.cos(angle * Math.PI / 180)
-      const s = Math.sin(angle * Math.PI / 180)
+      const c = Math.cos((angle * Math.PI) / 180)
+      const s = Math.sin((angle * Math.PI) / 180)
       const x = (dw - sw * c + sh * s) / 2
       const y = (dh - sh * c - sw * s) / 2
 
@@ -143,8 +143,6 @@ let Opject: Operations = {
   },
   Mask: {
     nSources: 2,
-    operator: function ([image, mask], dest) {
-
-    }
+    operator: function ([image, mask], dest) {}
   }
 }

@@ -7,11 +7,16 @@ import { DiagramEntity } from '../LinksCanvas/findInvolvedEntity'
  */
 const getEntityCoordinates = (
   entity: DiagramEntity,
-  portRefs: ElementObject,
-  nodeRefs: ElementObject,
-  canvas: DOMRect
-): [number, number] => {
-  if (entity && entity.type === 'node' && nodeRefs[entity.entity.id]) {
+  portRefs: ElementObject | null,
+  nodeRefs: ElementObject | null,
+  canvas: DOMRect | null
+): [number, number] | null => {
+  if (
+    entity &&
+    entity.type === 'node' &&
+    nodeRefs !== null &&
+    nodeRefs[entity.entity.id]
+  ) {
     const nodeEl = nodeRefs[entity.entity.id]
     const bbox = nodeEl.getBoundingClientRect()
     const res: [number, number] = [
@@ -21,7 +26,7 @@ const getEntityCoordinates = (
     return res
   }
 
-  if (entity && portRefs && portRefs[entity.entity.id]) {
+  if (entity && portRefs && canvas !== null && portRefs[entity.entity.id]) {
     const portEl = portRefs[entity.entity.id]
     const bbox = portEl.getBoundingClientRect()
 
@@ -32,7 +37,7 @@ const getEntityCoordinates = (
     return res
   }
 
-  return undefined
+  return null
 }
 
 export default getEntityCoordinates

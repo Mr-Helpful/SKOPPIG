@@ -1,8 +1,9 @@
-import { Schema } from '../../shared/Types'
+import { Port, Schema } from '../../shared/Types'
 import { intersect } from './setMethods'
 
 type Graph = { [id: string]: string[] }
 
+type IdMap = { [id: string]: string }
 /**
  * Creates a linked list representation of the graph from the schema
  * A linked list representation is as so:
@@ -17,9 +18,9 @@ type Graph = { [id: string]: string[] }
  * @return The linked list representation
  */
 export const toGraph = (schema: Schema): Graph => {
-  let graph = {},
-    inPorts = {},
-    outPorts = {}
+  let graph: Graph = {}
+  let inPorts: IdMap = {}
+  let outPorts: IdMap = {}
   for (const node of schema.nodes) {
     graph[node.id] = []
     for (const port of node.inputs || []) inPorts[port.id] = node.id
@@ -52,7 +53,7 @@ export const graphChildren = (ids: string[], graph: Graph): Set<string> => {
 
   while (queue.length > 0) {
     const id = queue.shift()
-    if (graph[id] !== undefined) {
+    if (id !== undefined && graph[id] !== undefined) {
       for (const sub of graph[id]) {
         if (!seen.has(sub)) {
           queue.push(sub)
@@ -67,7 +68,7 @@ export const graphChildren = (ids: string[], graph: Graph): Set<string> => {
 
 /** Flips the direction of all links in a graph */
 const reverse = (graph: Graph): Graph => {
-  const reversed = {}
+  let reversed: Graph = {}
   for (const id in graph) reversed[id] = []
 
   for (const id in graph) {
@@ -80,7 +81,7 @@ const reverse = (graph: Graph): Graph => {
 
 /** Transforms a graph into an undirected graph */
 const undirect = (graph: Graph): Graph => {
-  const undirected = {}
+  let undirected: Graph = {}
   for (const id in graph) undirected[id] = []
 
   for (const id in graph) {

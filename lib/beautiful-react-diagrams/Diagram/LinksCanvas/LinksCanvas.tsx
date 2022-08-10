@@ -3,7 +3,7 @@ import DiagramLink from '../Link/DiagramLink'
 import DiagramSegment from '../Segment/DiagramSegment'
 import findInvolvedEntity from './findInvolvedEntity'
 import removeLink from './removeLinkFromArray'
-import { Segment } from '../Segment/DiagramSegment'
+import { Segment } from '../Diagram'
 import { Node, Link } from '../../shared/Types'
 
 interface LinksCanvasProps {
@@ -11,7 +11,7 @@ interface LinksCanvasProps {
   segment: Segment
   links: Link[]
   onChange: (links: Link[]) => void
-  onNodeSelect: (id: string) => void
+  onNodeSelect: (id?: string) => void
 }
 
 /**
@@ -25,7 +25,7 @@ const LinksCanvas = ({
   onNodeSelect
 }: LinksCanvasProps) => {
   const removeFromLinksArray = useCallback(
-    link => {
+    (link: Link) => {
       if (links.length > 0 && onChange) {
         const nextLinks = removeLink(link, links)
         onChange(nextLinks)

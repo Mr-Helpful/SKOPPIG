@@ -5,7 +5,7 @@ import {
   exposedPorts,
   splitSchema,
   selectedIds,
-  selectIn,
+  selectIn
 } from './schemaMethods'
 
 export class MenuActions {
@@ -54,15 +54,15 @@ export class MenuActions {
     const ports = exposedPorts(ids, schema)
 
     // we set coordinates relative to the collapsed node
-    const collapsed = {
+    const collapsed: Schema = {
       nodes: inSchema.nodes.map(({ coordinates, ...node }) => ({
         ...node,
         coordinates: [
           coordinates[0] - toCollapse.coordinates[0],
-          coordinates[1] - toCollapse.coordinates[1],
-        ],
+          coordinates[1] - toCollapse.coordinates[1]
+        ]
       })),
-      links: inSchema.links,
+      links: inSchema.links
     }
 
     // determine the lowest possible id that isn't taken
@@ -75,13 +75,14 @@ export class MenuActions {
       ...toCollapse,
       id: `node-${newId}`,
       inputs: ports,
-      data: { collapsed, ...toCollapse.data },
+      collapsed,
+      data: { ...toCollapse.data }
     }
 
     // create the new schema using the 'out' schema and new node we generated
     const newSchema = {
       nodes: [replacement, ...outSchema.nodes],
-      links: outSchema.links,
+      links: outSchema.links
     }
     // console.log(newSchema)
     // console.groupEnd()
@@ -106,25 +107,22 @@ export class MenuActions {
   private expandFrom(schema: Schema, id: string): Schema {
     // console.group('expandFrom')
     const toExpand = schema.nodes.find(node => node.id === id)!
-    const {
-      data: { collapsed },
-      coordinates: coords,
-    } = toExpand
+    const { collapsed, coordinates: coords } = toExpand
     if (collapsed === undefined) return schema
 
     // reverse the offset transformation on nodes
-    const inSchema = {
+    const inSchema: Schema = {
       nodes: collapsed.nodes.map(({ coordinates, ...node }) => ({
         ...node,
-        coordinates: [coordinates[0] + coords[0], coordinates[1] + coords[1]],
+        coordinates: [coordinates[0] + coords[0], coordinates[1] + coords[1]]
       })),
-      links: collapsed.links, //.map(link => ({ ...link })),
+      links: collapsed.links //.map(link => ({ ...link })),
     }
 
     const nextNodes = schema.nodes.filter(node => node.id !== id)
     const res = {
       nodes: [...nextNodes, ...inSchema.nodes],
-      links: [...schema.links, ...inSchema.links],
+      links: [...schema.links, ...inSchema.links]
     }
     // console.groupEnd()
     return res

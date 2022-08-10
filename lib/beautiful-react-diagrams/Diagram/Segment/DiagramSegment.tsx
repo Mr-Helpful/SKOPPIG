@@ -1,19 +1,18 @@
 import React, { useMemo } from 'react'
 import makeSvgPath from '../../shared/functions/makeSvgPath'
 import { PortAlignment } from '../../shared/Types'
-
-export interface Segment {
-  from: [number, number]
-  to: [number, number]
-  alignment: PortAlignment
-}
+import { Segment } from '../Diagram'
 
 /**
  * Segment
  */
 const DiagramSegment = ({ from, to, alignment }: Segment) => {
   const path = useMemo(() => {
-    const pathOptions = { type: 'bezier', inputAlignment: alignment }
+    const pathOptions = {
+      type: 'bezier',
+      inputAlignment: alignment,
+      outputAlignment: undefined
+    }
     return makeSvgPath(from, to, pathOptions)
   }, [from, to, alignment])
 

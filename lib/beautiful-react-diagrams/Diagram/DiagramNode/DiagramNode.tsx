@@ -28,7 +28,7 @@ interface DiagramNodeProps extends Node {
     id: string,
     from: [number, number],
     to: [number, number],
-    alignment: PortAlignment
+    alignment?: PortAlignment
   ) => void
   /** The callback to be fired when a new diagram is mounted */
   onMount: (id: string, el: HTMLElement) => void
@@ -88,14 +88,14 @@ const DiagramNode = ({
       if (onPositionChange) {
         event.stopImmediatePropagation()
         event.stopPropagation()
-        const [ox, oy] = info.offset
+        const [ox, oy] = info.offset!
         const dist = ox * ox + oy * oy
         if (dist > clickSensitivity * clickSensitivity)
           triggerClick.current = false
 
         const nextCoords: [number, number] = [
-          dragStartPoint.current[0] - info.offset[0],
-          dragStartPoint.current[1] - info.offset[1]
+          dragStartPoint.current[0] - info.offset![0],
+          dragStartPoint.current[1] - info.offset![1]
         ]
         onPositionChange(id, nextCoords)
       }

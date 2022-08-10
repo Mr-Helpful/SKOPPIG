@@ -1,10 +1,22 @@
 import { useReducer, useCallback } from 'react'
 import ensureNodeId from '../../shared/functions/ensureNodeId'
 import schemaReducer from './schemaReducer'
-import { ON_CHANGE, ON_CONNECT, ON_NODE_ADD, ON_NODE_REMOVE } from './actionTypes'
+import {
+  ON_CHANGE,
+  ON_CONNECT,
+  ON_NODE_ADD,
+  ON_NODE_REMOVE
+} from './actionTypes'
 import { Schema, Node } from '../../shared/Types'
 
 const initialState = { nodes: [], links: [] }
+
+type SchemaMethods = {
+  onChange: (schema: Schema) => void
+  addNode: (node: Node) => void
+  removeNode: (node: Node) => void
+  connect: (input: string, output: string) => void
+}
 
 /**
  * useSchema hook
@@ -13,21 +25,27 @@ const initialState = { nodes: [], links: [] }
 /* eslint-disable max-len */
 const useSchema = (
   initialSchema: Schema = initialState
-): [
-    Schema,
-    {
-      onChange: (schema: Schema) => void,
-      addNode: (node: Node) => void,
-      removeNode: (id: string) => void,
-      connect: (input: string, output: string) => void
-    }
-  ] => {
+): [Schema, SchemaMethods] => {
   const [schema, dispatch] = useReducer(schemaReducer, initialSchema)
 
-  const onChange = useCallback(({ nodes, links }) => dispatch({ type: ON_CHANGE, payload: { nodes, links } }), [])
-  const addNode = useCallback((node) => dispatch({ type: ON_NODE_ADD, payload: { node: ensureNodeId(node) } }), [])
-  const removeNode = useCallback((node) => dispatch({ type: ON_NODE_REMOVE, payload: { nodeId: node.id } }), [])
-  const connect = useCallback((input, output) => dispatch({ type: ON_CONNECT, payload: { link: { input, output } } }), [])
+  const onChange = useCallback(
+    (schema: Schema) => dispatch({ type: ON_CHANGE, payload: schema }),
+    []
+  )
+  const addNode = useCallback(
+    (node: Node) =>
+      dispatch({ type: ON_NODE_ADD, payload: ensureNodeId(node) }),
+    []
+  )
+  const removeNode = useCallback(
+    (node: Node) => dispatch({ type: ON_NODE_REMOVE, payload: node.id }),
+    []
+  )
+  const connect = useCallback(
+    (input: string, output: string) =>
+      dispatch({ type: ON_CONNECT, payload: { input, output } }),
+    []
+  )
 
   return [schema, Object.freeze({ onChange, addNode, removeNode, connect })]
 }

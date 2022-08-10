@@ -33,10 +33,7 @@ export const cycleWith = (ids: string[], schema: Schema): boolean => {
  * that **only** contribute to the given node
  */
 export const collapsibleFrom = (ids: string[], schema: Schema): Set<string> => {
-  // console.group('collapsibleFrom')
-  // console.log(schema)
   const graph = toGraph(schema)
-  // console.log(graph)
 
   // nodes accessible from the id
   const children1 = graphChildren(ids, graph)
@@ -47,11 +44,10 @@ export const collapsibleFrom = (ids: string[], schema: Schema): Set<string> => {
   const children2 = graphChildren(toArray(rootSet), graph)
 
   // nodes only accessible via specified nodes
-  const res = difference(children1, children2)
-  // console.groupEnd()
-  return res
+  return difference(children1, children2)
 }
 
+type IdMap = { [id: string]: string }
 /**
  * Generates a mapping from input ports to node ids from a schema
  *
@@ -68,13 +64,13 @@ export const collapsibleFrom = (ids: string[], schema: Schema): Set<string> => {
  > { port2: "node1", port3: "node1" }
  * ```
  */
-const portToNode = (schema: Schema): { [portId: string]: string } => {
-  let outMap = {}
+const portToNode = (schema: Schema): IdMap => {
+  let outMap: IdMap = {}
   for (const node of schema.nodes) {
-    for (const port of node.outputs) outMap[port.id] = node.id
+    for (const port of node.outputs ?? []) outMap[port.id] = node.id
   }
 
-  let portMap = {}
+  let portMap: IdMap = {}
   for (const { input, output } of schema.links) {
     if (input in outMap) portMap[output] = outMap[input]
     if (output in outMap) portMap[input] = outMap[output]
@@ -101,14 +97,10 @@ const portToNode = (schema: Schema): { [portId: string]: string } => {
  * ```
  */
 export const exposedPorts = (ids: Set<string>, schema: Schema): Port[] => {
-  // console.group('exposedPorts')
   const portMap = portToNode(schema)
   const nodes = schema.nodes.filter(node => ids.has(node.id))
-  const ports = nodes.map(node => node.inputs).flat()
-  const res = ports.filter(({ id }) => !ids.has(portMap[id]))
-  // console.log(ports)
-  // console.groupEnd()
-  return res
+  const ports = nodes.map(node => node.inputs ?? []).flat()
+  return ports.filter(port => !ids.has(portMap[port!.id]))
 }
 
 /**
@@ -118,8 +110,8 @@ const splitNodes = (
   ids: Set<string>,
   schema: Schema
 ): { inNodes: Node[]; outNodes: Node[] } => {
-  let inNodes = [],
-    outNodes = []
+  let inNodes: Node[] = []
+  let outNodes: Node[] = []
   for (const node of schema.nodes) {
     ;(ids.has(node.id) ? inNodes : outNodes).push(node)
   }
@@ -134,16 +126,16 @@ const splitLinks = (
   ids: Set<string>,
   schema: Schema
 ): { inLinks: Link[]; outLinks: Link[] } => {
-  let inPorts = {},
-    outPorts = {}
+  let inPorts: IdMap = {}
+  let outPorts: IdMap = {}
   for (const node of schema.nodes)
     if (ids.has(node.id)) {
-      for (const port of node.inputs) inPorts[port.id] = node.id
-      for (const port of node.outputs) outPorts[port.id] = node.id
+      for (const port of node.inputs ?? []) inPorts[port.id] = node.id
+      for (const port of node.outputs ?? []) outPorts[port.id] = node.id
     }
 
-  let inLinks = [],
-    outLinks = []
+  let inLinks: Link[] = []
+  let outLinks: Link[] = []
   for (const link of schema.links) {
     ;((link.input in inPorts && link.output in outPorts) ||
     (link.output in inPorts && link.input in outPorts)
@@ -167,7 +159,7 @@ export const splitSchema = (
   const { inLinks, outLinks } = splitLinks(ids, schema)
   const res = {
     inSchema: { nodes: inNodes, links: inLinks },
-    outSchema: { nodes: outNodes, links: outLinks },
+    outSchema: { nodes: outNodes, links: outLinks }
   }
   // console.groupEnd()
   return res
@@ -189,6 +181,6 @@ export const selectIn = (ids: Set<string>, schema: Schema): Schema => {
         return { ...node, selected: true }
       } else return node
     }),
-    links: schema.links,
+    links: schema.links
   }
 }
