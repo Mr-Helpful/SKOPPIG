@@ -1,11 +1,13 @@
-import Head from 'next/head'
+import { useCallback, useState } from 'react'
 import Image from 'next/image'
-import { BrushMenu } from '../src/brush/BrushMenu'
+import Head from 'next/head'
+
+import { NodeModal } from '../src/NodeModal/NodeModal'
 import styles from '../styles/Home.module.css'
-import { BigStack } from '../src/BigStack'
-import { BrushDiagram } from '../src/nodes/BrushDiagram'
 
 export default function Home() {
+  const [elem, setElem] = useState<HTMLElement>(null)
+
   return (
     <div className={styles.container}>
       <Head>
@@ -14,18 +16,22 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <BrushDiagram />
-
-      <main className={styles.main}>
+      <main>
         <h1 className={styles.title}>
           Welcome to <a href="https://nextjs.org">Next.js!</a>
         </h1>
 
-        <BrushMenu onChange={state => console.log(state)} />
-
-        {/* <BigStack>
-        <text style={{ backgroundColor: 'red' }}>{"I'm stacked!"}</text>
-      </BigStack> */}
+        <div
+          onClick={ev => setElem(ev.target as HTMLElement)}
+          style={{
+            width: '60px',
+            height: '60px',
+            backgroundColor: 'blue'
+          }}
+        >
+          Get menu
+        </div>
+        <NodeModal elem={elem} close={() => setElem(null)} />
       </main>
 
       <footer className={styles.footer}>

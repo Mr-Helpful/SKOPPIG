@@ -8,7 +8,7 @@ import getNodePortsId from '../../shared/functions/getNodePortsId'
 import { Schema, Node } from '../../shared/Types'
 
 type SchemaAction =
-  | { type: typeof ON_CHANGE; payload: Schema }
+  | { type: typeof ON_CHANGE; payload: Partial<Schema> }
   | { type: typeof ON_NODE_ADD; payload: Node }
   | { type: typeof ON_NODE_REMOVE; payload: string }
   | { type: typeof ON_CONNECT; payload: { input: string; output: string } }

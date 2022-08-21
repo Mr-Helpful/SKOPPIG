@@ -1,4 +1,4 @@
-import { Schema, Node } from '../../shared/Types'
+import { Schema, Node } from '../../lib/beautiful-react-diagrams/shared/Types'
 import {
   childrenOf,
   collapsibleFrom,
@@ -42,14 +42,12 @@ export class MenuActions {
 
   /** Collapses all nodes that are directly accessible from a given id */
   private collapseFrom(schema: Schema, id: string): Schema {
-    // console.group('collapseFrom')
     const toCollapse = schema.nodes.find(node => node.id === id)
     if (toCollapse === undefined) return schema
 
     // split up the schema and calculate the exposed ports
     const ids = collapsibleFrom([id], schema)
     ids.add(id) // collapsibleFrom doesn't include the node to collapse
-    // console.log(ids)
     const { inSchema, outSchema } = splitSchema(ids, schema)
     const ports = exposedPorts(ids, schema)
 
@@ -84,18 +82,13 @@ export class MenuActions {
       nodes: [replacement, ...outSchema.nodes],
       links: outSchema.links
     }
-    // console.log(newSchema)
-    // console.groupEnd()
     return newSchema
   }
 
   /** Attempt to collapse all the currently selected nodes in the schema */
   collapse() {
-    // console.group('collapse')
     const selected = selectedIds(this.schema)
-    // console.log(`from selected = ${selected}`)
     const nSchema = selected.reduce(this.collapseFrom.bind(this), this.schema)
-    // console.groupEnd()
     this.onChange(nSchema)
   }
 
@@ -105,7 +98,6 @@ export class MenuActions {
 
   /** Expand a currently collapsed node within a schema */
   private expandFrom(schema: Schema, id: string): Schema {
-    // console.group('expandFrom')
     const toExpand = schema.nodes.find(node => node.id === id)!
     const { collapsed, coordinates: coords } = toExpand
     if (collapsed === undefined) return schema
@@ -124,17 +116,12 @@ export class MenuActions {
       nodes: [...nextNodes, ...inSchema.nodes],
       links: [...schema.links, ...inSchema.links]
     }
-    // console.groupEnd()
     return res
   }
 
   expand() {
-    // console.group('expand')
     const selected = selectedIds(this.schema)
-    // console.log(`from selected = ${selected}`)
     const nSchema = selected.reduce(this.expandFrom.bind(this), this.schema)
-    // console.log(nSchema)
-    // console.groupEnd()
     this.onChange(nSchema)
   }
 

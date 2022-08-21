@@ -6,7 +6,6 @@ import React, {
   HTMLAttributes
 } from 'react'
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
-import DiagramMenu from './DiagramMenu/DiagramMenu'
 import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
 
@@ -17,51 +16,41 @@ import {
   Schema,
   ElementObject,
   defaultSchema,
-  vacuouslyTrue
+  vacuouslyTrue,
+  ClickEvent
 } from '../shared/Types'
 
-/** Returns a state variable which represents whether target key is pressed */
-const useKeyDown = (target: string): boolean => {
-  let [down, setDown] = useState(false)
-  const onUp = useCallback<(ev: KeyboardEvent) => void>(
-    ({ key }) => key === target && setDown(false),
-    [target]
-  )
-  const onDown = useCallback<(ev: KeyboardEvent) => void>(
-    ({ key }) => key === target && setDown(true),
-    [target]
-  )
-
-  useEffect(() => {
-    window.addEventListener('keyup', onUp)
-    window.addEventListener('keydown', onDown)
-    return () => {
-      window.removeEventListener('keyup', onUp)
-      window.removeEventListener('keydown', onDown)
-    }
-  }, [onUp, onDown])
-  return down
-}
-
-export type Segment = {
+export interface Segment {
   id: string
   from: [number, number]
   to: [number, number]
   alignment?: PortAlignment
 }
 
-type Config = {
+interface Config {
   /** A ref to fill with a debug callback */
-  display?: { show: () => void }
+  displayRef?: { current: () => void }
   /** Whether a link should be added to the schema */
   shouldLink?: (link: Link, schema: Schema) => boolean
+  /** A callback for clicking on a node */
+  onNodeClick?: (ev: ClickEvent, node: Node) => void
+  /** A callback for clicking on a schema link */
+  onLinkClick?: (ev: ClickEvent, link: Link) => void
+  /** A callback for clicking on the background */
+  onCanvasClick?: (ev: ClickEvent) => void
 }
 
-// An unused display object to fill
-const defaultDisplay: Config['display'] = { show: () => {} }
+const defaultConfig: Config = {
+  displayRef: { current: () => {} },
+  shouldLink: vacuouslyTrue,
+  onNodeClick: () => {},
+  onLinkClick: () => {},
+  onCanvasClick: () => {}
+}
 
 interface DiagramProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
+  extends Config,
+    Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /**
    * The diagram current schema
    */
@@ -70,10 +59,6 @@ interface DiagramProps
    * The callback to be performed every time the model changes
    */
   onChange?: (schema: Partial<Schema>) => void
-  /**
-   * Additional diagram config
-   */
-  config?: Config
 }
 
 /**
@@ -86,7 +71,11 @@ interface DiagramProps
 const Diagram = ({
   schema = defaultSchema,
   onChange = undefined,
-  config: { display = defaultDisplay, shouldLink = vacuouslyTrue } = {},
+  displayRef = defaultConfig.displayRef,
+  shouldLink = defaultConfig.shouldLink,
+  onNodeClick = defaultConfig.onNodeClick,
+  onLinkClick = defaultConfig.onLinkClick,
+  onCanvasClick = defaultConfig.onCanvasClick,
   ...rest
 }: DiagramProps) => {
   const [segment, setSegment] = useState<Segment>()
@@ -94,8 +83,8 @@ const Diagram = ({
   const { current: nodeElems } = useRef<ElementObject>({}) // keeps the node elements references
 
   useEffect(() => {
-    display.show = () => {
-      console.log('%cNew references', 'color: green')
+    displayRef.current = () => {
+      console.group('%cNew references', 'color: green')
       for (let id in portElems) {
         console.log(id)
         console.log(portElems[id])
@@ -104,6 +93,7 @@ const Diagram = ({
         console.log(id)
         console.log(nodeElems[id])
       }
+      console.groupEnd()
     }
   })
 
@@ -171,22 +161,13 @@ const Diagram = ({
     if (onChange) onChange({ links: nextLinks })
   }
 
-  // whether to select multiple nodes at once
-  const multiSelect = useKeyDown('Shift')
-  const onNodeSelect = (id?: string) => {
-    if (onChange) {
-      const nodes = schema.nodes.map(node => {
-        if (node.id === id) return { ...node, selected: !node.selected }
-        else if (multiSelect) return node
-        else return { ...node, selected: false }
-      })
-      onChange({ nodes })
-    }
-  }
-
   return (
-    <DiagramCanvas portRefs={portElems} nodeRefs={nodeElems} {...rest}>
-      <DiagramMenu schema={schema} onChange={onChange} />
+    <DiagramCanvas
+      id={'brush-diagram'}
+      portRefs={portElems}
+      nodeRefs={nodeElems}
+      {...rest}
+    >
       <NodesCanvas
         nodes={schema.nodes}
         onChange={onNodesChange}
@@ -196,14 +177,15 @@ const Diagram = ({
         onDragNewSegment={onDragNewSegment}
         onSegmentFail={onSegmentFail}
         onSegmentConnect={onSegmentConnect}
-        onNodeSelect={onNodeSelect}
+        onNodeClick={onNodeClick}
       />
       <LinksCanvas
         nodes={schema.nodes}
         links={schema.links}
         segment={segment!}
         onChange={onLinkDelete}
-        onNodeSelect={onNodeSelect}
+        onLinkClick={onLinkClick}
+        onCanvasClick={onCanvasClick}
       />
     </DiagramCanvas>
   )

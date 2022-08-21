@@ -1,0 +1,45 @@
+.bi.node {
+  $port-radius: 1rem;
+  $edge-weight: 0.1rem;
+  $border-radius: 0.75rem;
+
+  display: inline-block;
+
+  // a container used to space ports
+  // along the top/bottom of the node
+  .ports {
+    display: flex;
+    justify-content: space-evenly;
+
+    &>* {
+      z-index: 1;
+    }
+
+    // a possible styling for a circular port
+    .circlePort {
+      width: $port-radius;
+      height: $port-radius;
+
+      border: $edge-weight solid black;
+      border-radius: $port-radius;
+      background-color: blue;
+    }
+  }
+
+  // a wrapper used to contain and align both
+  // the content and the action menu behind it
+  .content {
+    margin: calc($port-radius / -2 - 0.75 * $edge-weight) 0;
+    border: $edge-weight solid black;
+    border-radius: $border-radius;
+    background-color: white;
+
+    padding: calc($port-radius * 0.75);
+    text-align: center;
+
+    // give some indication of a node being selected
+    &.selected {
+      box-shadow: 0px 0px 5px black;
+    }
+  }
+}

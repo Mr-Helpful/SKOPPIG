@@ -12,9 +12,7 @@ export const CustomNode: NodeRender = ({
   return (
     <div className={`${styles.bi} ${styles.node}`}>
       <div className={styles.ports}>{outputs}</div>
-      <div className={styles.body}>
-        <div className={contentClass}>{content}</div>
-      </div>
+      <div className={contentClass}>{content}</div>
       <div className={styles.ports}>{inputs}</div>
     </div>
   )

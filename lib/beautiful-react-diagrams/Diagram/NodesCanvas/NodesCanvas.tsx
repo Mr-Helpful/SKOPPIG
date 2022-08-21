@@ -1,7 +1,7 @@
 import React from 'react'
 import DiagramNode from '../DiagramNode/DiagramNode'
 import updateNodeCoordinates from './updateNodeCoordinates'
-import { Coords, Node, PortAlignment } from '../../shared/Types'
+import { ClickEvent, Coords, Node, PortAlignment } from '../../shared/Types'
 
 interface NodesCanvasProps {
   nodes: Node[]
@@ -17,7 +17,7 @@ interface NodesCanvasProps {
   onSegmentFail: () => void
   onSegmentConnect: (input: string, output: string) => void
   onChange: (nodes: Node[]) => void
-  onNodeSelect: (id: string) => void
+  onNodeClick: (ev: ClickEvent, node: Node) => void
 }
 
 /**
@@ -32,7 +32,7 @@ const NodesCanvas = ({
   onSegmentFail,
   onSegmentConnect,
   onChange,
-  onNodeSelect
+  onNodeClick
 }: NodesCanvasProps) => {
   // when a node element updates its position, also change it within the schema
   const onNodePositionUpdate = (nodeId: string, coords: Coords) => {
@@ -70,7 +70,7 @@ const NodesCanvas = ({
             onSegmentFail={onSegmentFail}
             onSegmentConnect={onSegmentConnect}
             onMount={onNodeRegister}
-            onNodeSelect={onNodeSelect}
+            onNodeClick={onNodeClick}
           />
         ))}
     </div>

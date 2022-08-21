@@ -9,6 +9,7 @@ import {
 import useDrag from '../../shared/internal_hooks/useDrag'
 import useNodeUnregistration from '../../shared/internal_hooks/useNodeUnregistration'
 import {
+  ClickEvent,
   defaultContent,
   defaultData,
   defaultPorts,
@@ -37,7 +38,7 @@ interface DiagramNodeProps extends Node {
   /** The callback to be fired when a new segment connects to a port */
   onSegmentConnect: (input: string, output: string) => void
   /** The callback to be fired when a node is selected */
-  onNodeSelect: (id: string) => void
+  onNodeClick: (ev: ClickEvent, node: Node) => void
 }
 
 /**
@@ -66,7 +67,7 @@ const DiagramNode = ({
   onMount,
   onSegmentFail,
   onSegmentConnect,
-  onNodeSelect
+  onNodeClick
 }: DiagramNodeProps) => {
   const clickSensitivity = 5
   const registerPort = usePortRegistration(inputs, outputs, onPortRegister) // get the port registration method
@@ -112,7 +113,20 @@ const DiagramNode = ({
         dragStartPoint.current[1] - offset[1]
       ]
       onPositionChange(id, nextCoords)
-      if (triggerClick.current) onNodeSelect(id)
+      if (triggerClick.current)
+        onNodeClick(event as unknown as ClickEvent, {
+          id,
+          coordinates,
+          selected,
+          disableDrag,
+          content,
+          inputs,
+          outputs,
+          type,
+          render,
+          className,
+          data
+        })
     }
   })
 

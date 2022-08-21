@@ -1,4 +1,9 @@
-import { Schema, Node, Link, Port } from '../../shared/Types'
+import {
+  Schema,
+  Node,
+  Link,
+  Port
+} from '../../lib/beautiful-react-diagrams/shared/Types'
 import { difference, toArray } from './setMethods'
 import { graphChildren, toGraph, graphRootsFrom } from './graphMethods'
 
@@ -154,14 +159,12 @@ export const splitSchema = (
   ids: Set<string>,
   schema: Schema
 ): { inSchema: Schema; outSchema: Schema } => {
-  // console.group('splitSchema')
   const { inNodes, outNodes } = splitNodes(ids, schema)
   const { inLinks, outLinks } = splitLinks(ids, schema)
   const res = {
     inSchema: { nodes: inNodes, links: inLinks },
     outSchema: { nodes: outNodes, links: outLinks }
   }
-  // console.groupEnd()
   return res
 }
 

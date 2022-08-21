@@ -1,0 +1,54 @@
+$margin: 0.5rem;
+$duration: 2s;
+
+.nodeModal {
+  display: none;
+  position: fixed;
+
+  background: #f8f8f8;
+  border: 1px solid black;
+  border-radius: $margin;
+
+  overflow: clip;
+  white-space: nowrap;
+  z-index: 999;
+
+  &.enter {
+    display: block;
+    transition: inset $duration 0s ease;
+
+    .closeButton {
+      transition: opacity $duration 0s ease;
+    }
+  }
+
+  &.enterActive {
+    @extend .enter;
+    inset: $margin  !important;
+
+    .closeButton {
+      opacity: 1;
+    }
+  }
+
+  &.enterDone {
+    @extend .enterActive;
+  }
+
+  &.exit {
+    @extend .enter;
+  }
+
+  .closeButton {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 9999;
+
+    opacity: 0;
+  }
+}
+
+:export {
+  duration: $duration;
+}

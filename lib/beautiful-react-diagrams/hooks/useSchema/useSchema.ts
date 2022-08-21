@@ -12,7 +12,7 @@ import { Schema, Node } from '../../shared/Types'
 const initialState = { nodes: [], links: [] }
 
 type SchemaMethods = {
-  onChange: (schema: Schema) => void
+  onChange: (schema: Partial<Schema>) => void
   addNode: (node: Node) => void
   removeNode: (node: Node) => void
   connect: (input: string, output: string) => void
@@ -29,7 +29,7 @@ const useSchema = (
   const [schema, dispatch] = useReducer(schemaReducer, initialSchema)
 
   const onChange = useCallback(
-    (schema: Schema) => dispatch({ type: ON_CHANGE, payload: schema }),
+    (schema: Partial<Schema>) => dispatch({ type: ON_CHANGE, payload: schema }),
     []
   )
   const addNode = useCallback(

@@ -8,11 +8,7 @@ import React, {
 import useWindowScroll from 'beautiful-react-hooks/useWindowScroll'
 import useWindowResize from 'beautiful-react-hooks/useWindowResize'
 import classNames from 'classnames'
-import {
-  defaultContent,
-  defaultElementObject,
-  ElementObject
-} from '../../shared/Types'
+import { defaultContent, ElementObject } from '../../shared/Types'
 import DiagramContext from '../../Context/DiagramContext'
 
 interface DiagramCanvasProps extends HTMLAttributes<HTMLDivElement> {
@@ -26,8 +22,8 @@ interface DiagramCanvasProps extends HTMLAttributes<HTMLDivElement> {
  * allow links to easily access to a the ports coordinates
  */
 const DiagramCanvas = ({
-  portRefs = defaultElementObject,
-  nodeRefs = defaultElementObject,
+  portRefs,
+  nodeRefs,
   children = defaultContent,
   className = '',
   ...rest

@@ -4,10 +4,6 @@ import DiagramContext from '../../Context/DiagramContext'
 /**
  * Returns the node references from the DiagramContext
  */
-const useNodeRefs = () => {
-  const { nodes } = useContext(DiagramContext)
-
-  return nodes
-}
+const useNodeRefs = () => useContext(DiagramContext).nodes
 
 export default useNodeRefs

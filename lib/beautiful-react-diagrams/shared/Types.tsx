@@ -60,6 +60,9 @@ export type ElementObject = {
   [key: string]: HTMLElement
 }
 
+/** A generic click event for both HTML and SVG elements */
+export type ClickEvent = React.MouseEvent<Element, MouseEvent>
+
 /*----------------------------------------------------------------
 -                         default values                         -
 ----------------------------------------------------------------*/
@@ -96,3 +99,5 @@ export const defaultElementObject: ElementObject = {}
 
 // A generic function that is used in both DiagramPort.tsx, Diagram.tsx
 export const vacuouslyTrue: (...args: any[]) => boolean = () => true
+
+export const vacuouslyVoid: (...args: any[]) => void = () => {}

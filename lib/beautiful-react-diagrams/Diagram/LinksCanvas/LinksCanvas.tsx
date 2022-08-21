@@ -4,14 +4,15 @@ import DiagramSegment from '../Segment/DiagramSegment'
 import findInvolvedEntity from './findInvolvedEntity'
 import removeLink from './removeLinkFromArray'
 import { Segment } from '../Diagram'
-import { Node, Link } from '../../shared/Types'
+import { Node, Link, ClickEvent } from '../../shared/Types'
 
 interface LinksCanvasProps {
   nodes: Node[]
   segment: Segment
   links: Link[]
   onChange: (links: Link[]) => void
-  onNodeSelect: (id?: string) => void
+  onLinkClick: (ev: ClickEvent, link: Link) => void
+  onCanvasClick: (ev: ClickEvent) => void
 }
 
 /**
@@ -22,7 +23,8 @@ const LinksCanvas = ({
   segment,
   links,
   onChange,
-  onNodeSelect
+  onLinkClick,
+  onCanvasClick
 }: LinksCanvasProps) => {
   const removeFromLinksArray = useCallback(
     (link: Link) => {
@@ -35,10 +37,7 @@ const LinksCanvas = ({
   )
 
   return (
-    <div
-      onClick={() => onNodeSelect(undefined)}
-      className="bi bi-link-canvas-layer"
-    >
+    <div onClick={onCanvasClick} className="bi bi-link-canvas-layer">
       <svg>
         {links &&
           links.length > 0 &&
@@ -51,6 +50,7 @@ const LinksCanvas = ({
                 input={entityIn}
                 output={entityOut}
                 onDelete={removeFromLinksArray}
+                onLinkClick={onLinkClick}
                 key={`${entityIn.entity.id}-${entityOut.entity.id}`}
               />
             )

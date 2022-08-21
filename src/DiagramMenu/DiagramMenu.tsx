@@ -5,10 +5,16 @@ import {
   RiArrowUpSLine,
   RiArrowDownSLine,
   RiNodeTree,
-  RiRestartLine,
+  RiRestartLine
 } from 'react-icons/ri'
-import { Schema, defaultSchema, defaultCallback } from '../../shared/Types'
+import {
+  Schema,
+  defaultSchema,
+  defaultCallback
+} from '../../lib/beautiful-react-diagrams/shared/Types'
 import { MenuActions } from './menu-actions'
+
+import styles from './DiagramMenu.module.scss'
 
 interface DiagramMenuProps {
   schema?: Schema
@@ -17,12 +23,12 @@ interface DiagramMenuProps {
 
 const DiagramMenu = ({
   schema = defaultSchema,
-  onChange = defaultCallback,
+  onChange = defaultCallback
 }: DiagramMenuProps) => {
   const actions = new MenuActions(schema, onChange)
 
   return (
-    <div className={'bi bi-diagram-menu'}>
+    <div className={styles.diagramMenu}>
       <IconContext.Provider value={{ size: '2rem' }}>
         <RiDeleteBin2Fill onClick={() => actions.delete()} />
         <RiArrowUpSLine onClick={() => actions.collapse()} />
