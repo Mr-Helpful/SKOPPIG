@@ -27,12 +27,13 @@ export abstract class BrushNode {
     destination: CanvasRenderingContext2D
   ): void
 
-  // wraps together the render methods
+  // fallback when both methods fail
   renderFailure(destination: CanvasRenderingContext2D): void {
     const { width: cw, height: ch } = destination.canvas
     destination.drawImage(BsImage, cw / 2, ch / 2)
   }
 
+  // wraps together the render methods
   render(
     sources: CanvasRenderingContext2D[],
     destination: CanvasRenderingContext2D,

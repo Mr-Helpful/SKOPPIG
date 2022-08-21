@@ -1,9 +1,9 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import Head from 'next/head'
 
 import { NodeModal } from '../src/NodeModal/NodeModal'
-import styles from '../styles/Home.module.css'
+import styles from '../styles/Home.module.scss'
 
 export default function Home() {
   const [elem, setElem] = useState<HTMLElement>(null)
