@@ -21,7 +21,7 @@ The main tools can be split into two categories:
 
 This page is dedicated to designing custom brushes via a node based system
 
-![An image showing the layout of the brush design page](https://github.com/Mr-Helpful/skoppig_ts/blob/main/README-Images/Skoppig%20-%20Design.pdf)
+![An image showing the layout of the brush design page](https://github.com/Mr-Helpful/SKOPPIG/blob/490ef6c45c805f399858f5fa4ca8e7b9fd232e61/README-Images/Skoppig%20-%20Design.pdf)
 
 The node system primarily uses [beautiful-react-diagrams](https://github.com/antonioru/beautiful-react-diagrams) with the following edits made:
 
