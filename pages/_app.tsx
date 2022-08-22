@@ -1,4 +1,4 @@
-import '../styles/globals.scss'
+import '../src/globals.scss'
 import '../lib/beautiful-react-diagrams/Diagram/diagram.scss'
 
 function MyApp({ Component, pageProps }) {

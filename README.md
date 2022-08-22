@@ -30,7 +30,7 @@ The node system primarily uses [beautiful-react-diagrams](https://github.com/ant
 - Multiple graph algorithms have been added to the shared functions, to allow for folding of nodes
 - Added options to provide custom port rendering (both via custom classNames and custom render functions)
 
-The code for this modified version can be found in the `./src/design/beautiful-react-diagrams` directory
+The code for this modified version can be found in the `./lib/beautiful-react-diagrams` directory
 
 ## Getting Started
 
