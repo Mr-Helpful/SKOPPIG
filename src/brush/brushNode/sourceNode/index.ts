@@ -1,4 +1,4 @@
-import { BrushNode } from ".."
+import { BrushNode } from '..'
 
 export abstract class SourceNode extends BrushNode {
   noSources: number = 0

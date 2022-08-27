@@ -47,6 +47,7 @@ export const BrushDiagram = initialSchema => {
           </>
         ),
         coordinates: [125, 250],
+        selected: true,
         inputs: new Array(2).fill(0).map(() => ({
           id: `port-${pId.current++}`,
           alignment: 'bottom',

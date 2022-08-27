@@ -1,4 +1,4 @@
-import { Port, Schema } from '../../lib/beautiful-react-diagrams/shared/Types'
+import { Schema } from '../../lib/beautiful-react-diagrams/shared/Types'
 import { intersect } from './setMethods'
 
 type Graph = { [id: string]: string[] }

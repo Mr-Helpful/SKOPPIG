@@ -18,6 +18,7 @@ const useNodeUnregistration = (
       const outputsPort = getNodePortsId(node, 'outputs')
       onNodeRemove(id, inputsPort, outputsPort)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [] // no dependancies, we only want to run when the component is removed
   )
 }

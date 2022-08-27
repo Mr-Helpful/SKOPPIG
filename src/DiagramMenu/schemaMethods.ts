@@ -69,14 +69,14 @@ type IdMap = { [id: string]: string }
  > { port2: "node1", port3: "node1" }
  * ```
  */
-const portToNode = (schema: Schema): IdMap => {
+const portToNode = ({ nodes, links }: Schema): IdMap => {
   let outMap: IdMap = {}
-  for (const node of schema.nodes) {
+  for (const node of nodes) {
     for (const port of node.outputs ?? []) outMap[port.id] = node.id
   }
 
   let portMap: IdMap = {}
-  for (const { input, output } of schema.links) {
+  for (const { input, output } of links) {
     if (input in outMap) portMap[output] = outMap[input]
     if (output in outMap) portMap[input] = outMap[output]
   }
@@ -113,11 +113,11 @@ export const exposedPorts = (ids: Set<string>, schema: Schema): Port[] => {
  */
 const splitNodes = (
   ids: Set<string>,
-  schema: Schema
+  { nodes }: Schema
 ): { inNodes: Node[]; outNodes: Node[] } => {
   let inNodes: Node[] = []
   let outNodes: Node[] = []
-  for (const node of schema.nodes) {
+  for (const node of nodes) {
     ;(ids.has(node.id) ? inNodes : outNodes).push(node)
   }
   return { inNodes, outNodes }
@@ -129,11 +129,11 @@ const splitNodes = (
  */
 const splitLinks = (
   ids: Set<string>,
-  schema: Schema
+  { nodes, links }: Schema
 ): { inLinks: Link[]; outLinks: Link[] } => {
   let inPorts: IdMap = {}
   let outPorts: IdMap = {}
-  for (const node of schema.nodes)
+  for (const node of nodes)
     if (ids.has(node.id)) {
       for (const port of node.inputs ?? []) inPorts[port.id] = node.id
       for (const port of node.outputs ?? []) outPorts[port.id] = node.id
@@ -141,7 +141,7 @@ const splitLinks = (
 
   let inLinks: Link[] = []
   let outLinks: Link[] = []
-  for (const link of schema.links) {
+  for (const link of links) {
     ;((link.input in inPorts && link.output in outPorts) ||
     (link.output in inPorts && link.input in outPorts)
       ? inLinks
@@ -161,29 +161,24 @@ export const splitSchema = (
 ): { inSchema: Schema; outSchema: Schema } => {
   const { inNodes, outNodes } = splitNodes(ids, schema)
   const { inLinks, outLinks } = splitLinks(ids, schema)
-  const res = {
+  return {
     inSchema: { nodes: inNodes, links: inLinks },
     outSchema: { nodes: outNodes, links: outLinks }
   }
-  return res
 }
 
 /** Finds all currently selected nodes in the schema */
-export const selectedIds = (schema: Schema): string[] => {
-  const selected = schema.nodes
-    .filter(node => node.selected)
-    .map(node => node.id)
-  return selected
+export const selectedIds = ({ nodes }: Schema): string[] => {
+  return nodes.filter(node => node.selected).map(node => node.id)
 }
 
 /** Selects all nodes in a schema from a given set */
-export const selectIn = (ids: Set<string>, schema: Schema): Schema => {
+export const selectIn = (
+  ids: Set<string>,
+  { nodes, links }: Schema
+): Schema => {
   return {
-    nodes: schema.nodes.map(node => {
-      if (ids.has(node.id)) {
-        return { ...node, selected: true }
-      } else return node
-    }),
-    links: schema.links
+    nodes: nodes.map(node => ({ ...node, selected: ids.has(node.id) })),
+    links
   }
 }

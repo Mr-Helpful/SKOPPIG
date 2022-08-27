@@ -1,4 +1,4 @@
-import { RandomNode } from "."
+import { RandomNode } from '.'
 
 export class PerlinNode extends RandomNode {
   noSources = 0
@@ -11,15 +11,12 @@ export class PerlinNode extends RandomNode {
     let len = buffer32.length - 1
 
     // iterate over the image array and write pseudorandom values
-    while (len--) buffer32[len] = this.perlinFunction(
-      len % w, Math.floor(len / w)
-    )
+    while (len--)
+      buffer32[len] = this.perlinFunction(len % w, Math.floor(len / w))
     destination.putImageData(idata, 0, 0)
   }
 
-  private perlinFunction(
-    x: number, y: number
-  ): number {
+  private perlinFunction(x: number, y: number): number {
     // Find unit grid cell containing point
     const x0 = Math.floor(x)
     const y0 = Math.floor(y)

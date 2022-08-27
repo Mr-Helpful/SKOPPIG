@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react'
 import makeSvgPath from '../../shared/functions/makeSvgPath'
-import { PortAlignment } from '../../shared/Types'
 import { Segment } from '../Diagram'
 
 /**

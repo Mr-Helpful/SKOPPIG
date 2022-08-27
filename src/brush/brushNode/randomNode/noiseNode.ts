@@ -1,4 +1,4 @@
-import { RandomNode } from "."
+import { RandomNode } from '.'
 
 export class NoiseNode extends RandomNode {
   noSources = 0
@@ -11,9 +11,10 @@ export class NoiseNode extends RandomNode {
     var len = buffer32.length - 1
 
     // iterate over the image array and write pseudorandom values
-    while (len--) buffer32[len] = Math.floor(this.random(
-      len % w, Math.floor(len / w)
-    ) * 256)
+    while (len--)
+      buffer32[len] = Math.floor(
+        this.random(len % w, Math.floor(len / w)) * 256
+      )
     destination.putImageData(idata, 0, 0)
   }
 }

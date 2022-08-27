@@ -10,7 +10,7 @@ export const CustomNode: NodeRender = ({
   let contentClass = styles.content
   if (selected) contentClass += ` ${styles.selected}`
   return (
-    <div className={`${styles.bi} ${styles.node}`}>
+    <div className={`${styles.node}`}>
       <div className={styles.ports}>{outputs}</div>
       <div className={contentClass}>{content}</div>
       <div className={styles.ports}>{inputs}</div>

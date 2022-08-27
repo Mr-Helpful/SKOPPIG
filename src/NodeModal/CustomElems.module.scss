@@ -1,4 +1,4 @@
-.bi.node {
+.node {
   $port-radius: 1rem;
   $edge-weight: 0.1rem;
   $border-radius: 0.75rem;
@@ -12,6 +12,7 @@
     justify-content: space-evenly;
 
     &>* {
+      @extend .circlePort;
       z-index: 1;
     }
 

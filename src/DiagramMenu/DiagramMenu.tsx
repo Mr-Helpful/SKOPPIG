@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { HTMLAttributes } from 'react'
 import { IconContext } from 'react-icons'
 import {
   RiDeleteBin2Fill,
@@ -16,19 +16,23 @@ import { MenuActions } from './menu-actions'
 
 import styles from './DiagramMenu.module.scss'
 
-interface DiagramMenuProps {
+interface DiagramMenuProps
+  extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   schema?: Schema
   onChange?: (schema: Partial<Schema>) => void
 }
 
 const DiagramMenu = ({
   schema = defaultSchema,
-  onChange = defaultCallback
+  onChange = defaultCallback,
+  className = '',
+  ...rest
 }: DiagramMenuProps) => {
   const actions = new MenuActions(schema, onChange)
+  const classes = styles.diagramMenu + (className && ` ${className}`)
 
   return (
-    <div className={styles.diagramMenu}>
+    <div className={classes} {...rest}>
       <IconContext.Provider value={{ size: '2rem' }}>
         <RiDeleteBin2Fill onClick={() => actions.delete()} />
         <RiArrowUpSLine onClick={() => actions.collapse()} />

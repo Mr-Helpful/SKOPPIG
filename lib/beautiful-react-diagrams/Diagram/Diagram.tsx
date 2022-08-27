@@ -162,12 +162,7 @@ const Diagram = ({
   }
 
   return (
-    <DiagramCanvas
-      id={'brush-diagram'}
-      portRefs={portElems}
-      nodeRefs={nodeElems}
-      {...rest}
-    >
+    <DiagramCanvas portRefs={portElems} nodeRefs={nodeElems} {...rest}>
       <NodesCanvas
         nodes={schema.nodes}
         onChange={onNodesChange}
