@@ -1,4 +1,5 @@
 import styles from 'NodeStash.module.scss'
+import React from 'react'
 
 /** A Temporary store for brush nodes
  * 
@@ -6,10 +7,12 @@ import styles from 'NodeStash.module.scss'
 [ ] Dragging from diagram to stash
  */
 
-export const NodeStash = () => {
+const NodeStash = () => {
   return (
     <div className={styles.diagramMenu} draggable>
       Maybe draggable
     </div>
   )
 }
+
+export default React.memo(NodeStash)

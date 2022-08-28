@@ -1,9 +1,4 @@
-import {
-  Schema,
-  Node,
-  Link,
-  Port
-} from '../../lib/beautiful-react-diagrams/shared/Types'
+import { Schema, Node, Link, Port } from '../../lib/beautiful-react-diagrams'
 import { difference, toArray } from './setMethods'
 import { graphChildren, toGraph, graphRootsFrom } from './graphMethods'
 

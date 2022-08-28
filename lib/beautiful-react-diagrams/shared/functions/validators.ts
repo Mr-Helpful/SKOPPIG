@@ -125,4 +125,3 @@ export const validateSchema = ({ links, nodes }: Schema): boolean => {
 
   return validateLinks(links) && validateNodes(nodes)
 }
-export default validateSchema

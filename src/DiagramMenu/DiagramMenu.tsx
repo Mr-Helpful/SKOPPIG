@@ -7,11 +7,7 @@ import {
   RiNodeTree,
   RiRestartLine
 } from 'react-icons/ri'
-import {
-  Schema,
-  defaultSchema,
-  defaultCallback
-} from '../../lib/beautiful-react-diagrams/shared/Types'
+import { Schema, defaultSchema } from '../../lib/beautiful-react-diagrams'
 import { MenuActions } from './menu-actions'
 
 import styles from './DiagramMenu.module.scss'
@@ -22,9 +18,12 @@ interface DiagramMenuProps
   onChange?: (schema: Partial<Schema>) => void
 }
 
+// set to variable, so the reference remains the same
+const callback = () => {}
+
 const DiagramMenu = ({
   schema = defaultSchema,
-  onChange = defaultCallback,
+  onChange = callback,
   className = '',
   ...rest
 }: DiagramMenuProps) => {

@@ -1,7 +1,7 @@
 /**
  * Custom Error
  */
-export class DiagramSchemaError extends Error {
+class DiagramSchemaError extends Error {
   constructor(msg: string) {
     super(msg)
 

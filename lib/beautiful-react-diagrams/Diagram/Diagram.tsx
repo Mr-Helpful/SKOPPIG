@@ -10,6 +10,7 @@ import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
 
 import {
+  Segment,
   Link,
   Node,
   PortAlignment,
@@ -19,13 +20,6 @@ import {
   vacuouslyTrue,
   ClickEvent
 } from '../shared/Types'
-
-export interface Segment {
-  id: string
-  from: [number, number]
-  to: [number, number]
-  alignment?: PortAlignment
-}
 
 interface Config {
   /** A ref to fill with a debug callback */

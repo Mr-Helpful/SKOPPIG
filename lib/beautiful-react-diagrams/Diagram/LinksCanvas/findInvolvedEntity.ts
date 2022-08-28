@@ -1,11 +1,11 @@
 import { Port, Node } from '../../shared/Types'
 
-export interface NodeEntity {
+interface NodeEntity {
   type: 'node'
   entity: Node
 }
 
-export interface PortEntity {
+interface PortEntity {
   type: 'port'
   entity: Port
 }

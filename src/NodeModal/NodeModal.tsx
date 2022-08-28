@@ -1,20 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import {
-  Diagram,
-  useSchema,
-  createSchema
-} from '../../lib/beautiful-react-diagrams'
-import useKeyDown from './useKeyDown'
-import { Schema } from '../../lib/beautiful-react-diagrams/shared/Types'
-import DiagramMenu from '../DiagramMenu/DiagramMenu'
-import { CustomNode } from './CustomElems'
-
 /**
 Adapted from: 【css】Neumorphism_animation by ma_suwa
 @see {@link https://codepen.io/ma_suwa/pens/showcase}
 */
 import { CSSTransition } from 'react-transition-group'
+import { isHotkeyPressed } from 'react-hotkeys-hook'
 import { RiCloseFill } from 'react-icons/ri'
+
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  Schema,
+  Diagram,
+  useSchema,
+  createSchema
+} from '../../lib/beautiful-react-diagrams'
+import DiagramMenu from '../DiagramMenu/DiagramMenu'
+import NodeStash from '../NodeStash/NodeStash'
+import CustomNode from './CustomElems'
 
 import styles from './NodeModal.module.scss'
 
@@ -108,17 +109,20 @@ export const NodeModal = ({
   }, [schema, connect])
 
   // whether to select multiple nodes at once
-  const multiSelect = useKeyDown('Shift')
-  const onNodeSelect = (id?: string) => {
-    if (onChange) {
-      const nodes = schema.nodes.map(node => {
-        if (node.id === id) return { ...node, selected: !node.selected }
-        else if (multiSelect) return node
-        else return { ...node, selected: false }
-      })
-      onChange({ nodes })
-    }
-  }
+  const multiSelect = isHotkeyPressed('shift')
+  const onNodeSelect = useCallback(
+    (id?: string) => {
+      if (onChange) {
+        const nodes = schema.nodes.map(node => {
+          if (node.id === id) return { ...node, selected: !node.selected }
+          else if (multiSelect) return node
+          else return { ...node, selected: false }
+        })
+        onChange({ nodes })
+      }
+    },
+    [schema, onChange, multiSelect]
+  )
 
   const nodeRef = useRef<HTMLDivElement>(null)
   return (
@@ -131,6 +135,7 @@ export const NodeModal = ({
       <div ref={nodeRef} className={styles.nodeModal} style={rect.current}>
         <RiCloseFill className={styles.closeButton} onClick={close} />
         <DiagramMenu schema={schema} onChange={onChange} />
+        <NodeStash />
         <div onClick={addOne}>Add a node!</div>
         <div onClick={display.current}>Show the refs!</div>
         <div onClick={linkRandom}>Link something!</div>

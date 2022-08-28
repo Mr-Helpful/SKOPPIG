@@ -1,4 +1,4 @@
-import { Schema, Node } from '../../lib/beautiful-react-diagrams/shared/Types'
+import { Schema, Node } from '../../lib/beautiful-react-diagrams'
 import {
   childrenOf,
   collapsibleFrom,

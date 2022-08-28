@@ -4,6 +4,13 @@ import { ReactNode } from 'react'
 -                        Typescript types                        -
 ----------------------------------------------------------------*/
 
+export type Segment = {
+  id: string
+  from: [number, number]
+  to: [number, number]
+  alignment?: PortAlignment
+}
+
 /** Link type */
 export type Link = {
   input: string
@@ -15,7 +22,7 @@ export type Link = {
 
 /** Port type */
 export type PortAlignment = 'left' | 'right' | 'top' | 'bottom'
-export type PortType = 'input' | 'output'
+type PortType = 'input' | 'output'
 
 export type Port = {
   id: string
@@ -42,7 +49,7 @@ export type Node = {
   data?: any
 }
 
-export type NodeRender = (
+type NodeRender = (
   props: Omit<Node, 'coordinates' | 'inputs' | 'outputs'> & {
     inputs: ReactNode[]
     outputs: ReactNode[]
@@ -92,12 +99,5 @@ export const defaultSchema: Schema = {
   links: []
 }
 
-// A generic void returning function for any callbacks
-export const defaultCallback: (...args: any[]) => void = () => {}
-
-export const defaultElementObject: ElementObject = {}
-
 // A generic function that is used in both DiagramPort.tsx, Diagram.tsx
 export const vacuouslyTrue: (...args: any[]) => boolean = () => true
-
-export const vacuouslyVoid: (...args: any[]) => void = () => {}

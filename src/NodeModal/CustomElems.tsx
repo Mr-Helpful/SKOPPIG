@@ -1,16 +1,12 @@
-import { NodeRender } from '../../lib/beautiful-react-diagrams/shared/Types'
+import React from 'react'
+import { Node } from '../../lib/beautiful-react-diagrams'
 import styles from './CustomElems.module.scss'
 
-export const CustomNode: NodeRender = ({
-  content,
-  inputs,
-  outputs,
-  selected
-}) => {
+const CustomNode = ({ content, inputs, outputs, selected }) => {
   let contentClass = styles.content
   if (selected) contentClass += ` ${styles.selected}`
   return (
-    <div className={`${styles.node}`}>
+    <div className={styles.node}>
       <div className={styles.ports}>{outputs}</div>
       <div className={contentClass}>{content}</div>
       <div className={styles.ports}>{inputs}</div>
@@ -18,20 +14,4 @@ export const CustomNode: NodeRender = ({
   )
 }
 
-export const CustomPort = ({
-  id,
-  ref,
-  direction,
-  type,
-  className,
-  ...rest
-}) => {
-  return (
-    <div
-      className={'bi-diagram-port-custom'}
-      ref={ref}
-      data-port-id={id}
-      {...rest}
-    ></div>
-  )
-}
+export default React.memo(CustomNode) as Node['render']

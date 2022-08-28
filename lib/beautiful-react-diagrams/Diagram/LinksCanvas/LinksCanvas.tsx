@@ -3,8 +3,7 @@ import DiagramLink from '../Link/DiagramLink'
 import DiagramSegment from '../Segment/DiagramSegment'
 import findInvolvedEntity from './findInvolvedEntity'
 import removeLink from './removeLinkFromArray'
-import { Segment } from '../Diagram'
-import { Node, Link, ClickEvent } from '../../shared/Types'
+import { Node, Link, ClickEvent, Segment } from '../../shared/Types'
 
 interface LinksCanvasProps {
   nodes: Node[]
