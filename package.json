@@ -12,12 +12,15 @@
     "analyze:server": "cross-env BUNDLE_ANALYZE=server next build",
     "analyze:browser": "cross-env BUNDLE_ANALYZE=browser next build"
   },
+  "engines":{
+    "node": "^16.0.0"
+  },
   "dependencies": {
-    "@emotion/react": "^11.10.0",
-    "@emotion/styled": "^11.10.0",
+    "@chakra-ui/react": "^2.3.2",
     "@fseehawer/react-circular-slider": "^2.5.9",
     "beautiful-react-hooks": "^3.10.0",
     "classnames": "^2.3.1",
+    "gpu.js": "^2.15.2",
     "next": "12.2.4",
     "react": "18.2.0",
     "react-colorful": "^5.5.1",
@@ -30,6 +33,8 @@
   "devDependencies": {
     "@babel/core": "^7.18.10",
     "@chakra-ui/styled-system": "^2.2.5",
+    "@emotion/react": "^11.0.0-rc.0",
+    "@emotion/styled": "^11.0.0",
     "@next/bundle-analyzer": "^12.2.4",
     "@playwright/test": "^1.24.2",
     "@types/lodash.throttle": "^4.1.7",
@@ -40,6 +45,7 @@
     "cross-env": "^7.0.3",
     "eslint": "8.21.0",
     "eslint-config-next": "12.2.4",
+    "framer-motion": ">=4.0.0",
     "global": "^4.4.0",
     "install-peers": "^1.0.4",
     "react-router-dom": "^6.3.0",

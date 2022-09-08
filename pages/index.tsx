@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Head from 'next/head'
 
-import { NodeModal } from '../src/NodeModal/NodeModal'
+import NodeModal from '../src/BrushModal/NodeModal'
 
 export default function Home() {
   const [elem, setElem] = useState<HTMLElement>(null)

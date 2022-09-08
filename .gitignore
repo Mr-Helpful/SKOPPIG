@@ -38,7 +38,6 @@ yarn-error.log*
 /_Trash
 
 # because package.json gives enough info on the current requirements
-package-lock.json
 yarn.lock
 
 # testing libraries

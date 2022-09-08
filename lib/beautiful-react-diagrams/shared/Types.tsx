@@ -67,8 +67,8 @@ export type ElementObject = {
   [key: string]: HTMLElement
 }
 
-/** A generic click event for both HTML and SVG elements */
-export type ClickEvent = React.MouseEvent<Element, MouseEvent>
+/** A generic click event for both HTML elements */
+export type ClickEvent = React.MouseEvent<HTMLElement, MouseEvent>
 
 /*----------------------------------------------------------------
 -                         default values                         -

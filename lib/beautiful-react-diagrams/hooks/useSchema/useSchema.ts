@@ -1,5 +1,5 @@
 import { useReducer, useCallback } from 'react'
-import ensureNodeId from '../../shared/functions/ensureNodeId'
+import ensureNodeIds from '../../shared/functions/ensureNodeId'
 import schemaReducer from './schemaReducer'
 import {
   ON_CHANGE,
@@ -34,7 +34,7 @@ const useSchema = (
   )
   const addNode = useCallback(
     (node: Node) =>
-      dispatch({ type: ON_NODE_ADD, payload: ensureNodeId(node) }),
+      dispatch({ type: ON_NODE_ADD, payload: ensureNodeIds(node) }),
     []
   )
   const removeNode = useCallback(

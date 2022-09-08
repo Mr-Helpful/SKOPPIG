@@ -35,22 +35,46 @@ const unlinked = (schema: Schema): { input: string; output: string }[] => {
 
 const defaultNodes: Node[] = [
   {
-    id: `0`,
+    id: '',
     content: <RiImage2Line size={50} />,
     coordinates: [125, 250],
     selected: false,
     inputs: new Array(2).fill(0).map((_, i) => ({
-      id: `in${i}`,
+      id: '',
       alignment: 'bottom'
     })),
     outputs: new Array(1).fill(0).map((_, i) => ({
-      id: `out${i}`,
+      id: '',
       alignment: 'top'
     })),
     render: BrushNode,
     data: {}
   }
 ]
+
+/** Returns a function that can be used to assign unique ids to any node it is
+ * called with and its ports
+ */
+const useIdAssigner = () => {
+  const nId = useRef(0)
+  const pId = useRef(0)
+
+  return useCallback(
+    ({ id, inputs, outputs, ...node }: Node): Node => ({
+      id: `node-${nId.current++}`,
+      inputs: (inputs ?? []).map(({ id, ...port }) => ({
+        id: `port-${pId.current++}`,
+        ...port
+      })),
+      outputs: (outputs ?? []).map(({ id, ...port }) => ({
+        id: `port-${pId.current++}`,
+        ...port
+      })),
+      ...node
+    }),
+    [nId, pId]
+  )
+}
 
 const noCycles = (link: Link, { nodes, links }: Schema) => {
   // find either of the nodes the link connects
@@ -68,27 +92,10 @@ const ModalContent = () => {
   const [schema, { onChange, addNode, connect }] = useSchema(startSchema)
   const display = useRef(() => {})
 
-  const nId = useRef(0)
-  const pId = useRef(0)
+  const assigner = useIdAssigner()
   const addOne = useCallback(
-    () =>
-      addNode({
-        id: `node-${nId.current++}`,
-        content: <RiImage2Line size={50} />,
-        coordinates: [125, 250],
-        selected: false,
-        inputs: new Array(2).fill(0).map(() => ({
-          id: `port-${pId.current++}`,
-          alignment: 'bottom'
-        })),
-        outputs: new Array(1).fill(0).map(() => ({
-          id: `port-${pId.current++}`,
-          alignment: 'top'
-        })),
-        render: BrushNode,
-        data: {}
-      }),
-    [addNode]
+    () => addNode(assigner(defaultNodes[0])),
+    [addNode, assigner]
   )
 
   const linkRandom = useCallback(() => {
@@ -99,10 +106,11 @@ const ModalContent = () => {
   }, [schema, connect])
 
   // whether to select multiple nodes at once
-  const multiSelect = isHotkeyPressed('shift')
   const onNodeSelect = useCallback(
     (id?: string) => {
       if (onChange) {
+        const multiSelect = isHotkeyPressed('shift')
+
         const nodes = schema.nodes.map(node => {
           if (node.id === id) return { ...node, selected: !node.selected }
           else if (multiSelect) return node
@@ -111,13 +119,13 @@ const ModalContent = () => {
         onChange({ nodes })
       }
     },
-    [schema, onChange, multiSelect]
+    [schema, onChange]
   )
 
   return (
     <>
       <DiagramMenu schema={schema} onChange={onChange} />
-      <NodeStash nodes={defaultNodes} />
+      <NodeStash nodes={defaultNodes.map(assigner)} />
       <div onClick={addOne}>Add a node!</div>
       <div onClick={display.current}>Show the refs!</div>
       <div onClick={linkRandom}>Link something!</div>
@@ -126,7 +134,7 @@ const ModalContent = () => {
           schema={schema}
           onChange={onChange}
           displayRef={display}
-          shouldLink={noCycles}
+          shouldLink={() => true}
           onNodeClick={(_, { id }) => onNodeSelect(id)}
           onCanvasClick={() => onNodeSelect(undefined)}
         />

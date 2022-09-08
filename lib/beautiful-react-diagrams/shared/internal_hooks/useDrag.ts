@@ -1,5 +1,12 @@
 import throttle from 'lodash.throttle'
-import { useRef, useCallback, useEffect, MutableRefObject } from 'react'
+import {
+  useRef,
+  useCallback,
+  useEffect,
+  MutableRefObject,
+  MouseEvent,
+  RefObject
+} from 'react'
 
 type Options = {
   throttleBy: number
@@ -18,10 +25,9 @@ const defaultOptions = {
  * @param event
  * @returns {*[]}
  */
-const getEventCoordinates = (event: MouseEvent): [number, number] => [
-  event.clientX,
-  event.clientY
-]
+const getEventCoordinates = <P extends HTMLElement>(
+  event: MouseEvent<P>
+): [number, number] => [event.clientX, event.clientY]
 
 /**
  * Create a persistent callback reference that will live trough a component lifecycle
@@ -46,7 +52,7 @@ type DragInfo = {
   offset: [number, number] | null
 }
 
-type Handler = (event: MouseEvent, info: DragInfo) => void
+type Handler<P> = (event: MouseEvent<P>, info: DragInfo) => void
 
 /**
  * A custom hook exposing handlers and ref for developing draggable React elements.
@@ -93,11 +99,13 @@ type Handler = (event: MouseEvent, info: DragInfo) => void
  * }
  * ```
  */
-const useDrag = <P extends HTMLElement>(options: Options = defaultOptions) => {
-  const targetRef = useRef<P>(null) // the target draggable element
-  const dragStartHandlerRef = useRef<Handler>() // a ref to user's onDragStart handler
-  const dragHandlerRef = useRef<Handler>() // a ref to user's onDrag handler
-  const dragEndHandlerRef = useRef<Handler>() // a ref to user's onDragEnd handler
+const useDrag = <P extends HTMLElement>(
+  targetRef: RefObject<P>,
+  options: Options = defaultOptions
+) => {
+  const dragStartHandlerRef = useRef<Handler<P>>() // a ref to user's onDragStart handler
+  const dragHandlerRef = useRef<Handler<P>>() // a ref to user's onDrag handler
+  const dragEndHandlerRef = useRef<Handler<P>>() // a ref to user's onDragEnd handler
   // the dragging state is created from a useRef rather than a useState to avoid rendering during the dragging process
   const { current: info } = useRef<DragInfo>({
     isDragging: false,
@@ -110,7 +118,7 @@ const useDrag = <P extends HTMLElement>(options: Options = defaultOptions) => {
    * When the dragging starts, updates the state then perform the user's onDragStart handler if exists
    */
   const onDragStart = useCallback(
-    (event: MouseEvent) => {
+    (event: MouseEvent<P>) => {
       if (
         !info.isDragging &&
         targetRef.current &&
@@ -134,7 +142,7 @@ const useDrag = <P extends HTMLElement>(options: Options = defaultOptions) => {
    * Whilst dragging the element, updates the state then perform the user's onDrag handler if exists
    */
   const onDrag = useCallback(
-    throttle((event: MouseEvent) => {
+    throttle((event: MouseEvent<P>) => {
       if (info.isDragging) {
         info.offset = [
           info.start![0] - event.clientX,
@@ -153,7 +161,7 @@ const useDrag = <P extends HTMLElement>(options: Options = defaultOptions) => {
    * When the dragging ends, updates the state then perform the user's onDragEnd handler if exists
    */
   const onDragEnd = useCallback(
-    (event: MouseEvent) => {
+    (event: MouseEvent<P>) => {
       if (info.isDragging) {
         info.isDragging = false
         info.end = getEventCoordinates(event)
@@ -171,9 +179,9 @@ const useDrag = <P extends HTMLElement>(options: Options = defaultOptions) => {
    */
   useEffect(() => {
     /* eslint-disable no-underscore-dangle */
-    const _onDragStart = (e: MouseEvent) => onDragStart(e)
-    const _onDrag = (e: MouseEvent) => onDrag(e)
-    const _onDragEnd = (e: MouseEvent) => onDragEnd(e)
+    const _onDragStart = e => onDragStart(e)
+    const _onDrag = e => onDrag(e)
+    const _onDragEnd = e => onDragEnd(e)
     /* eslint-enable no-underscore-dangle */
 
     const currentTarget = targetRef.current

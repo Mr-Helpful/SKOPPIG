@@ -89,7 +89,7 @@ const DiagramLink = ({
         <path
           d={path}
           className="bi-link-ghost"
-          onClick={ev => onLinkClick(ev, link)}
+          onClick={ev => onLinkClick(ev as unknown as ClickEvent, link)}
           onDoubleClick={onDoubleClick}
         />
       )}
@@ -97,7 +97,7 @@ const DiagramLink = ({
         d={path}
         ref={pathRef}
         className="bi-link-path"
-        onClick={ev => onLinkClick(ev, link)}
+        onClick={ev => onLinkClick(ev as unknown as ClickEvent, link)}
         onDoubleClick={onDoubleClick}
       />
       {link.label && labelPosition && (

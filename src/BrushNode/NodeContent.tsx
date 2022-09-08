@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { Node } from '../../lib/beautiful-react-diagrams'
-import { RenderNode } from './renderNodes'
+import { RenderEvent, RenderNode } from './renderNodes'
 
 type NodeContentProps = Omit<Node, 'data'> & {
   data: {
@@ -14,11 +14,11 @@ const NodeContent = ({ data: { renderer } }: NodeContentProps) => {
   useEffect(() => {
     if (ref.current !== null) {
       const ctx = ref.current.getContext('2d')
-      const onRender = data => ctx.putImageData(data, 0, 0)
+      const onRender = (ev: RenderEvent) => ctx.putImageData(ev.img, 0, 0)
 
-      renderer.on('render', onRender)
+      renderer.addEventListener('render', onRender)
       return () => {
-        renderer.off('render', onRender)
+        renderer.addEventListener('render', onRender)
       }
     }
   }, [ref, renderer])

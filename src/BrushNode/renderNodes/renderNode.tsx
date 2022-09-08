@@ -1,7 +1,6 @@
 import { GPU } from 'gpu.js'
 import { render } from 'react-dom'
 import { RiErrorWarningLine, RiImage2Line } from 'react-icons/ri'
-import { EventEmitter } from 'stream'
 
 import styles from './renderNodes.module.scss'
 
@@ -18,13 +17,19 @@ export class RenderError extends Error {
   }
 }
 
+export class RenderEvent extends Event {
+  constructor(public img: ImageData, eventInitDict?: EventInit) {
+    super('render', eventInitDict)
+  }
+}
+
 /** A Class capable of rendering a variety of specialised operations
  * to ImageData and updating upstream nodes with the result
  *
  * @param {[number, number]} dimensions the size of the output ImageData
  * @param {[number, number]} [translation] an optional translation for output
  */
-export abstract class RenderNode extends EventEmitter {
+export abstract class RenderNode extends EventTarget {
   /* Declare a single canvas context and GPU instance for all nodes to use */
   protected readonly ctx = document.createElement('canvas').getContext('2d')
   protected readonly gpu = new GPU({
@@ -76,8 +81,8 @@ export abstract class RenderNode extends EventEmitter {
     this.ctx.clearRect(0, 0, w, h)
 
     try {
-      const undef = this.sources.findIndex(source => source === undefined)
-      if (undef > -1) throw this.error(`source ${undef} is not defined`)
+      const index = this.sources.findIndex(source => source === undefined)
+      if (index > -1) throw this.error(`source ${index} is not defined`)
 
       switch (mode) {
         case 'gpu':
@@ -96,10 +101,10 @@ export abstract class RenderNode extends EventEmitter {
           throw this.error(`rendering method ${mode} not implemented`)
       }
 
-      this.emit('render', this.ctx.getImageData(0, 0, w, h))
+      this.dispatchEvent(new RenderEvent(this.ctx.getImageData(0, 0, w, h)))
     } catch (e) {
-      this.emit('error', e)
-      this.emit('render', undefined)
+      console.error(e)
+      this.dispatchEvent(new RenderEvent(undefined))
     }
   }
 

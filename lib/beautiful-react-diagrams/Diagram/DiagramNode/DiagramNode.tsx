@@ -13,11 +13,12 @@ import {
   defaultContent,
   defaultData,
   defaultPorts,
+  defaultSchema,
   Node,
   PortAlignment
 } from '../../shared/Types'
 
-interface DiagramNodeProps extends Node {
+export interface DiagramNodeProps extends Node {
   /** The callback to be fired when position changes */
   onPositionChange: (id: string, offset: [number, number]) => void
   /** The callback to be fired when a new port is settled */
@@ -58,6 +59,7 @@ const DiagramNode = ({
   type = 'default',
   render = undefined,
   className = '',
+  collapsed = defaultSchema,
   data = defaultData,
   // callbacks from parents
   onPositionChange,
@@ -71,7 +73,8 @@ const DiagramNode = ({
 }: DiagramNodeProps) => {
   const clickSensitivity = 5
   const registerPort = usePortRegistration(inputs, outputs, onPortRegister) // get the port registration method
-  const { ref, onDragStart, onDrag, onDragEnd } = useDrag<HTMLDivElement>({
+  const ref = useRef<HTMLDivElement>()
+  const { onDragStart, onDrag, onDragEnd } = useDrag(ref, {
     throttleBy: 14
   }) // get the drag n drop methods
   const triggerClick = useRef(false) // whether a node has been move little enough to consider this a click event
@@ -87,7 +90,7 @@ const DiagramNode = ({
     // whilst dragging calculates the next coordinates and perform the `onPositionChange` callback
     onDrag((event, info) => {
       if (onPositionChange) {
-        event.stopImmediatePropagation()
+        event.nativeEvent.stopImmediatePropagation()
         event.stopPropagation()
         const [ox, oy] = info.offset!
         const dist = ox * ox + oy * oy
@@ -105,7 +108,7 @@ const DiagramNode = ({
 
   onDragEnd((event, info) => {
     if (onPositionChange) {
-      event.stopImmediatePropagation()
+      event.nativeEvent.stopImmediatePropagation()
       event.stopPropagation()
       const offset = info.offset || [0, 0]
       const nextCoords: [number, number] = [
@@ -114,7 +117,7 @@ const DiagramNode = ({
       ]
       onPositionChange(id, nextCoords)
       if (triggerClick.current)
-        onNodeClick(event as unknown as ClickEvent, {
+        onNodeClick(event, {
           id,
           coordinates,
           selected,
@@ -125,6 +128,7 @@ const DiagramNode = ({
           type,
           render,
           className,
+          collapsed,
           data
         })
     }
@@ -165,6 +169,7 @@ const DiagramNode = ({
     outputs: OutputPorts,
     data,
     className,
+    collapsed,
     selected
   }
 

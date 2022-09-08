@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import makeSvgPath from '../../shared/functions/makeSvgPath'
-import { Segment } from '../Diagram'
+import { Segment } from '../../shared/Types'
 
 /**
  * Segment
