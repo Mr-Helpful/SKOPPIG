@@ -48,7 +48,7 @@ export const toGraph = (schema: Schema): Graph => {
  * @return The ids of all direct descendants
  */
 export const graphChildren = (ids: string[], graph: Graph): Set<string> => {
-  let queue = ids
+  let queue = [...ids]
   let seen = new Set<string>()
 
   while (queue.length > 0) {

@@ -4,7 +4,7 @@ import {
   useCallback,
   useEffect,
   MutableRefObject,
-  MouseEvent,
+  MouseEvent as ReactMouseEvent,
   RefObject
 } from 'react'
 
@@ -26,8 +26,39 @@ const defaultOptions = {
  * @returns {*[]}
  */
 const getEventCoordinates = <P extends HTMLElement>(
-  event: MouseEvent<P>
+  event: ReactMouseEvent<P>
 ): [number, number] => [event.clientX, event.clientY]
+
+/** Wraps a simple MouseEvent in the relevant React SyntheticEvent */
+const wrapMouseEvent = <P extends HTMLElement>(
+  ev: MouseEvent
+): ReactMouseEvent<P> => {
+  let prevented = false
+  let stopped = false
+  return {
+    ...ev,
+    clientX: ev.clientX,
+    clientY: ev.clientY,
+    currentTarget: ev.currentTarget as EventTarget & P,
+    target: ev.target as EventTarget & P,
+    view: {
+      ...ev.view,
+      styleMedia: { type: 'all', matchMedium: mediaquery => false }
+    },
+    nativeEvent: ev,
+    preventDefault() {
+      ev.preventDefault()
+      prevented = true
+    },
+    isDefaultPrevented: () => prevented,
+    stopPropagation() {
+      ev.stopPropagation()
+      stopped = true
+    },
+    isPropagationStopped: () => stopped,
+    persist() {}
+  }
+}
 
 /**
  * Create a persistent callback reference that will live trough a component lifecycle
@@ -52,7 +83,7 @@ type DragInfo = {
   offset: [number, number] | null
 }
 
-type Handler<P> = (event: MouseEvent<P>, info: DragInfo) => void
+type Handler<P> = (event: ReactMouseEvent<P>, info: DragInfo) => void
 
 /**
  * A custom hook exposing handlers and ref for developing draggable React elements.
@@ -118,7 +149,7 @@ const useDrag = <P extends HTMLElement>(
    * When the dragging starts, updates the state then perform the user's onDragStart handler if exists
    */
   const onDragStart = useCallback(
-    (event: MouseEvent<P>) => {
+    (event: ReactMouseEvent<P>) => {
       if (
         !info.isDragging &&
         targetRef.current &&
@@ -142,7 +173,7 @@ const useDrag = <P extends HTMLElement>(
    * Whilst dragging the element, updates the state then perform the user's onDrag handler if exists
    */
   const onDrag = useCallback(
-    throttle((event: MouseEvent<P>) => {
+    throttle((event: ReactMouseEvent<P>) => {
       if (info.isDragging) {
         info.offset = [
           info.start![0] - event.clientX,
@@ -161,7 +192,7 @@ const useDrag = <P extends HTMLElement>(
    * When the dragging ends, updates the state then perform the user's onDragEnd handler if exists
    */
   const onDragEnd = useCallback(
-    (event: MouseEvent<P>) => {
+    (event: ReactMouseEvent<P>) => {
       if (info.isDragging) {
         info.isDragging = false
         info.end = getEventCoordinates(event)
@@ -179,9 +210,9 @@ const useDrag = <P extends HTMLElement>(
    */
   useEffect(() => {
     /* eslint-disable no-underscore-dangle */
-    const _onDragStart = e => onDragStart(e)
-    const _onDrag = e => onDrag(e)
-    const _onDragEnd = e => onDragEnd(e)
+    const _onDragStart = (e: MouseEvent) => onDragStart(wrapMouseEvent(e))
+    const _onDrag = (e: MouseEvent) => onDrag(wrapMouseEvent(e))
+    const _onDragEnd = (e: MouseEvent) => onDragEnd(wrapMouseEvent(e))
     /* eslint-enable no-underscore-dangle */
 
     const currentTarget = targetRef.current

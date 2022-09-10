@@ -1,5 +1,4 @@
 import React, { useCallback, useRef } from 'react'
-import { isHotkeyPressed } from 'react-hotkeys-hook'
 import Diagram, {
   createSchema,
   Schema,
@@ -13,6 +12,7 @@ import NodeStash from '../NodeStash/NodeStash'
 import { ModalBackground } from './Modal'
 import { RiImage2Line } from 'react-icons/ri'
 import { cycleWith } from '../DiagramMenu/schemaMethods'
+import { ClickEvent } from '../../lib/beautiful-react-diagrams/shared/Types'
 
 const unlinked = (schema: Schema): { input: string; output: string }[] => {
   const inputs: string[] = schema.nodes
@@ -51,6 +51,8 @@ const defaultNodes: Node[] = [
     data: {}
   }
 ]
+
+const unusedNode: Node = { id: undefined, coordinates: [0, 0] }
 
 /** Returns a function that can be used to assign unique ids to any node it is
  * called with and its ports
@@ -107,17 +109,29 @@ const ModalContent = () => {
 
   // whether to select multiple nodes at once
   const onNodeSelect = useCallback(
-    (id?: string) => {
-      if (onChange) {
-        const multiSelect = isHotkeyPressed('shift')
+    (ev: ClickEvent, { id }: Node) => {
+      const selecteds = schema.nodes.filter(({ selected }) => selected)
+      const multiSelect = ev.nativeEvent.shiftKey
+      const manySelected = selecteds.length > 1
 
-        const nodes = schema.nodes.map(node => {
-          if (node.id === id) return { ...node, selected: !node.selected }
-          else if (multiSelect) return node
+      const nodes = schema.nodes.map(({ selected, ...node }) => {
+        if (multiSelect) {
+          // if we're holding shift, just toggle clicked node
+          if (node.id === id) return { ...node, selected: !selected }
+          else return { ...node, selected }
+        } else if (manySelected) {
+          // if multiple nodes are selected and we're not holding shift,
+          // then only select the clicked node
+          if (node.id === id) return { ...node, selected: true }
           else return { ...node, selected: false }
-        })
-        onChange({ nodes })
-      }
+        } else {
+          // if only one node is selected and we're not holding shift,
+          // then toggle the clicked node
+          if (node.id === id) return { ...node, selected: !selected }
+          else return { ...node, selected: false }
+        }
+      })
+      onChange({ nodes })
     },
     [schema, onChange]
   )
@@ -134,9 +148,9 @@ const ModalContent = () => {
           schema={schema}
           onChange={onChange}
           displayRef={display}
-          shouldLink={() => true}
-          onNodeClick={(_, { id }) => onNodeSelect(id)}
-          onCanvasClick={() => onNodeSelect(undefined)}
+          shouldLink={noCycles}
+          onNodeClick={onNodeSelect}
+          onCanvasClick={ev => onNodeSelect(ev, unusedNode)}
         />
       </ModalBackground>
     </>

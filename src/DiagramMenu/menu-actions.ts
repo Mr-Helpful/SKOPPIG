@@ -33,6 +33,7 @@ export class MenuActions {
   children() {
     const selected = selectedIds(this.schema)
     const children = childrenOf(selected, this.schema)
+    for (const id of selected) children.add(id)
     this.onChange(selectIn(children, this.schema))
   }
 

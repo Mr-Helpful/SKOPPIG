@@ -8,6 +8,7 @@ import React, {
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
 import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
+import removeLink from './LinksCanvas/removeLinkFromArray'
 
 import {
   Segment,
@@ -26,6 +27,12 @@ interface Config {
   displayRef?: { current: () => void }
   /** Whether a link should be added to the schema */
   shouldLink?: (link: Link, schema: Schema) => boolean
+
+  /** A callback when an input and output are connected in the diagram */
+  onConnect?: (link: Link) => void
+  /** A callback when an input and output are disconnected in the diagram */
+  onDisconnect?: (link: Link) => void
+
   /** A callback for clicking on a node */
   onNodeClick?: (ev: ClickEvent, node: Node) => void
   /** A callback for clicking on a schema link */
@@ -37,9 +44,13 @@ interface Config {
 const defaultConfig: Config = {
   displayRef: { current: () => {} },
   shouldLink: vacuouslyTrue,
-  onNodeClick: () => {},
-  onLinkClick: () => {},
-  onCanvasClick: () => {}
+
+  onConnect(link) {},
+  onDisconnect(link) {},
+
+  onNodeClick(ev, node) {},
+  onLinkClick(ev, link) {},
+  onCanvasClick(ev) {}
 }
 
 interface DiagramProps
@@ -67,6 +78,10 @@ const Diagram = ({
   onChange = undefined,
   displayRef = defaultConfig.displayRef,
   shouldLink = defaultConfig.shouldLink,
+
+  onConnect = defaultConfig.onConnect,
+  onDisconnect = defaultConfig.onDisconnect,
+
   onNodeClick = defaultConfig.onNodeClick,
   onLinkClick = defaultConfig.onLinkClick,
   onCanvasClick = defaultConfig.onCanvasClick,
@@ -146,14 +161,23 @@ const Diagram = ({
     if (shouldLink({ input, output }, schema)) {
       const nextLinks: Link[] = [...(schema.links || []), { input, output }]
       if (onChange) onChange({ links: nextLinks })
+      onConnect({ input, output })
     }
     setSegment(undefined)
   }
 
   // when links change, performs the onChange callback with the new incoming data
-  const onLinkDelete = (nextLinks: Link[]) => {
-    if (onChange) onChange({ links: nextLinks })
-  }
+
+  const onLinkDelete = useCallback(
+    ({ input, output }: Link) => {
+      if (schema.links.length > 0 && onChange) {
+        const nextLinks = removeLink({ input, output }, schema.links)
+        if (onChange) onChange({ links: nextLinks })
+        onDisconnect({ input, output })
+      }
+    },
+    [schema, onChange, onDisconnect]
+  )
 
   return (
     <DiagramCanvas portRefs={portElems} nodeRefs={nodeElems} {...rest}>
@@ -172,7 +196,7 @@ const Diagram = ({
         nodes={schema.nodes}
         links={schema.links}
         segment={segment!}
-        onChange={onLinkDelete}
+        onDelete={onLinkDelete}
         onLinkClick={onLinkClick}
         onCanvasClick={onCanvasClick}
       />

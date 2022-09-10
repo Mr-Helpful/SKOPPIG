@@ -14,7 +14,9 @@
     "**/_esy": true,
     "**/.esy": true,
     ".vscode": true,
-    ".github": true
+    ".github": true,
+    "build": true,
+    "node_modules": true
   },
   "explorerExclude.backup": {},
   "findUnusedExports.detectCircularImports": true
