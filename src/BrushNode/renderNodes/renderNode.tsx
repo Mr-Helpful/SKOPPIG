@@ -18,7 +18,7 @@ export class RenderError extends Error {
 }
 
 export class RenderEvent extends Event {
-  constructor(public img: ImageData, eventInitDict?: EventInit) {
+  constructor(public img: ImageData | undefined, eventInitDict?: EventInit) {
     super('render', eventInitDict)
   }
 }
@@ -35,6 +35,10 @@ export abstract class RenderNode extends EventTarget {
   protected readonly gpu = new GPU({
     canvas: document.createElement('canvas')
   })
+  protected current?: ImageData = undefined
+  get img(): ImageData {
+    return this.current
+  }
 
   /**
    * @param dimensions The width and height of the resulting render
@@ -101,10 +105,12 @@ export abstract class RenderNode extends EventTarget {
           throw this.error(`rendering method ${mode} not implemented`)
       }
 
-      this.dispatchEvent(new RenderEvent(this.ctx.getImageData(0, 0, w, h)))
+      this.current = this.ctx.getImageData(0, 0, w, h)
     } catch (e) {
       console.error(e)
-      this.dispatchEvent(new RenderEvent(undefined))
+      this.current = undefined
+    } finally {
+      this.dispatchEvent(new RenderEvent(this.current))
     }
   }
 

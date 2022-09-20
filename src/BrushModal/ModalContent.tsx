@@ -14,25 +14,6 @@ import { RiImage2Line } from 'react-icons/ri'
 import { cycleWith } from '../DiagramMenu/schemaMethods'
 import { ClickEvent } from '../../lib/beautiful-react-diagrams/shared/Types'
 
-const unlinked = (schema: Schema): { input: string; output: string }[] => {
-  const inputs: string[] = schema.nodes
-    .map(node => (node.inputs ?? []).map(({ id }) => id))
-    .flat()
-  const outputs: string[] = schema.nodes
-    .map(node => (node.outputs ?? []).map(({ id }) => id))
-    .flat()
-  const links = inputs
-    .map(input => outputs.map(output => ({ input, output })))
-    .flat()
-  return links.filter(({ input, output }) =>
-    schema.links.every(
-      link =>
-        (link.input !== input || link.output !== output) &&
-        (link.input !== output || link.output !== input)
-    )
-  )
-}
-
 const defaultNodes: Node[] = [
   {
     id: '',
@@ -94,18 +75,12 @@ const ModalContent = () => {
   const [schema, { onChange, addNode, connect }] = useSchema(startSchema)
   const display = useRef(() => {})
 
+  // how to generate a new node in the diagram
   const assigner = useIdAssigner()
   const addOne = useCallback(
     () => addNode(assigner(defaultNodes[0])),
     [addNode, assigner]
   )
-
-  const linkRandom = useCallback(() => {
-    const links = unlinked(schema)
-    if (links.length === 0) return
-    const link = links[Math.floor(Math.random() * links.length)]
-    connect(link.input, link.output)
-  }, [schema, connect])
 
   // whether to select multiple nodes at once
   const onNodeSelect = useCallback(
@@ -142,7 +117,6 @@ const ModalContent = () => {
       <NodeStash nodes={defaultNodes.map(assigner)} />
       <div onClick={addOne}>Add a node!</div>
       <div onClick={display.current}>Show the refs!</div>
-      <div onClick={linkRandom}>Link something!</div>
       <ModalBackground>
         <Diagram
           schema={schema}
