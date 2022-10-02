@@ -1,4 +1,4 @@
-import { BrushNode } from '../src/brush/brushNode'
+type BrushNode = Brush[]
 
 interface DAGNode {
   brush: BrushNode

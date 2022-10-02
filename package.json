@@ -16,25 +16,18 @@
     "node": "^16.0.0"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.3.2",
-    "@fseehawer/react-circular-slider": "^2.5.9",
     "beautiful-react-hooks": "^3.10.0",
-    "classnames": "^2.3.1",
+    "classnames": "^2.3.2",
     "gpu.js": "^2.15.2",
-    "next": "12.2.4",
+    "next": "canary",
     "react": "18.2.0",
-    "react-colorful": "^5.5.1",
     "react-dom": "18.2.0",
-    "react-hotkeys-hook": "^3.4.7",
     "react-icons": "^4.4.0",
     "react-transition-group": "^4.4.5",
     "sass": "^1.54.3"
   },
   "devDependencies": {
     "@babel/core": "^7.18.10",
-    "@chakra-ui/styled-system": "^2.2.5",
-    "@emotion/react": "^11.0.0-rc.0",
-    "@emotion/styled": "^11.0.0",
     "@next/bundle-analyzer": "^12.2.4",
     "@playwright/test": "^1.24.2",
     "@types/lodash.throttle": "^4.1.7",
@@ -45,11 +38,12 @@
     "cross-env": "^7.0.3",
     "eslint": "8.21.0",
     "eslint-config-next": "12.2.4",
-    "framer-motion": ">=4.0.0",
-    "global": "^4.4.0",
     "install-peers": "^1.0.4",
     "react-router-dom": "^6.3.0",
-    "rxjs": "^7.5.6",
     "typescript": "4.7.4"
+  },
+  "packageManager": "yarn@3.2.3",
+  "peerDependencies": {
+    "rxjs": "*"
   }
 }

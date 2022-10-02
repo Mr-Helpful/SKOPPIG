@@ -1,26 +1,15 @@
 import React, { HTMLAttributes, useEffect, useMemo, useRef } from 'react'
 import classNames from 'classnames'
 import useDrag from '../../shared/internal_hooks/useDrag'
-import useCanvas from '../../shared/internal_hooks/useCanvas'
+import { useCanvas } from '../../Context/DiagramContext'
 import getRelativePoint from '../../shared/functions/getRelativePoint'
-import { Port, PortAlignment, vacuouslyTrue } from '../../shared/Types'
+import { useDiagramMethods } from '../MethodContext/MethodContext'
+
+import { Port, vacuouslyTrue } from '../../shared/Types'
 
 interface DiagramPortProps
   extends Port,
     Omit<HTMLAttributes<HTMLDivElement>, 'id'> {
-  onMount: (id: string, el: HTMLElement) => void
-  onDragNewSegment: (
-    id: string,
-    from: [number, number],
-    to: [number, number],
-    alignment?: PortAlignment
-  ) => void
-  onSegmentFail: (id: string, type: 'input' | 'output') => void
-  onSegmentConnect: (
-    input: string,
-    output: string,
-    type: 'input' | 'output'
-  ) => void
   type: 'input' | 'output'
 }
 
@@ -30,15 +19,11 @@ const DiagramPort = ({
   canLink = vacuouslyTrue,
   alignment,
   className = '',
-  // callbacks from parents
-  onDragNewSegment,
-  onSegmentFail,
-  onSegmentConnect,
-  onMount,
   // extra types added to Port
   type,
   ...rest
 }: DiagramPortProps) => {
+  const methods = useDiagramMethods()
   const canvas = useCanvas()
   const ref = useRef<HTMLDivElement>()
   const { onDragStart, onDrag, onDragEnd } = useDrag(ref)
@@ -56,7 +41,7 @@ const DiagramPort = ({
         [canvas.x, canvas.y]
       )
 
-      onDragNewSegment(id, from, to, alignment)
+      methods.onDragNewSegment({ id, from, to, alignment })
     }
   })
 
@@ -68,21 +53,18 @@ const DiagramPort = ({
     if (
       targetPort &&
       event.target !== ref.current &&
-      canLink(id, targetPort, type) &&
-      onSegmentConnect
+      canLink(id, targetPort, type)
     ) {
-      if (type === 'input') onSegmentConnect(id, targetPort, type)
-      else onSegmentConnect(targetPort, id, type)
+      if (type === 'input') methods.onSegmentConnect(id, targetPort)
+      else methods.onSegmentConnect(targetPort, id)
       return
     }
-    if (onSegmentFail) onSegmentFail(id, type)
+    methods.onSegmentFail()
   })
 
   useEffect(() => {
-    if (ref.current && onMount) {
-      onMount(id, ref.current)
-    }
-  }, [id, onMount, ref])
+    if (ref.current) methods.onPortRegister(id, ref.current)
+  }, [id, methods, ref])
 
   const classList = useMemo(
     () => classNames('bi bi-diagram-port bi-diagram-port-default', className),

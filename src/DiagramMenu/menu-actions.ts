@@ -21,7 +21,7 @@ export class MenuActions {
   /** Deletes all selected nodes and their links */
   delete() {
     const selected = selectedIds(this.schema)
-    const { outSchema } = splitSchema(new Set(selected), this.schema)
+    const { outSchema } = splitSchema(new Set(selected), this.schema, true)
     this.onChange(outSchema)
   }
 

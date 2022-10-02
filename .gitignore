@@ -39,6 +39,7 @@ yarn-error.log*
 
 # because package.json gives enough info on the current requirements
 yarn.lock
+.yarn
 
 # testing libraries
 /test-results/

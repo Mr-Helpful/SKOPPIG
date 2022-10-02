@@ -1,14 +1,12 @@
 import { GPU } from 'gpu.js'
-import { render } from 'react-dom'
-import { RiErrorWarningLine, RiImage2Line } from 'react-icons/ri'
+import { RiErrorWarningLine } from 'react-icons/ri'
+import {
+  Coords,
+  Node
+} from '../../../lib/beautiful-react-diagrams/shared/Types'
+import BrushNode from '../BrushNode'
 
 import styles from './renderNodes.module.scss'
-
-// a default SVG path to draw upon failure
-const container = document.createElement('div')
-render(<RiImage2Line />, container)
-const pathElem = container.querySelectorAll('path')[1]
-const failurePath = new Path2D(pathElem.getAttribute('d'))
 
 export class RenderError extends Error {
   constructor(renderNode: RenderNode, msg: string) {
@@ -31,10 +29,11 @@ export class RenderEvent extends Event {
  */
 export abstract class RenderNode extends EventTarget {
   /* Declare a single canvas context and GPU instance for all nodes to use */
-  protected readonly ctx = document.createElement('canvas').getContext('2d')
-  protected readonly gpu = new GPU({
-    canvas: document.createElement('canvas')
-  })
+  private static ctx: CanvasRenderingContext2D
+  private static gpu: GPU
+  protected readonly ctx: CanvasRenderingContext2D
+  protected readonly gpu: GPU
+  /* Cache the data resulting from a render */
   protected current?: ImageData = undefined
   get img(): ImageData {
     return this.current
@@ -45,6 +44,12 @@ export abstract class RenderNode extends EventTarget {
    */
   constructor(public dimensions: [number, number]) {
     super()
+    this.ctx ??= RenderNode.ctx ??= document
+      .createElement('canvas')
+      .getContext('2d')
+    this.gpu ??= RenderNode.gpu ??= new GPU({
+      canvas: document.createElement('canvas')
+    })
   }
 
   /** how many sources should be provided for a render
@@ -128,7 +133,7 @@ export abstract class RenderNode extends EventTarget {
   /*----------------------------------------------------------------
   -                        Settings methods                        -
   ----------------------------------------------------------------*/
-  menu() {
+  Menu() {
     return (
       <div className={styles.centeredMenu}>
         <RiErrorWarningLine />
@@ -136,6 +141,25 @@ export abstract class RenderNode extends EventTarget {
         <div>{"This is the base class for nodes and shouldn't be shown!"}</div>
       </div>
     )
+  }
+
+  /*----------------------------------------------------------------
+  -                         Diagram methods                        -
+  ----------------------------------------------------------------*/
+  toNode(coordinates: Coords): Node {
+    return {
+      id: '',
+      coordinates,
+      selected: false,
+      content: <div>{this.constructor.name}</div>,
+      inputs: new Array(this.noSources).fill(0).map(_ => ({
+        id: '',
+        alignment: 'bottom'
+      })),
+      outputs: [{ id: '', alignment: 'top' }],
+      Render: BrushNode,
+      data: { instance: this }
+    }
   }
 
   /*----------------------------------------------------------------
@@ -155,4 +179,9 @@ export abstract class RenderNode extends EventTarget {
   toIndex([x, y]: [number, number], w: number): number {
     return x + w * y
   }
+}
+
+export const isRenderNode = (obj: any): obj is typeof RenderNode => {
+  if (typeof obj !== 'function') return false
+  else return obj.prototype instanceof RenderNode
 }

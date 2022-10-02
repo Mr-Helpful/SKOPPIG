@@ -1,4 +1,3 @@
-import { RenderNode } from '../renderNode'
 import { RandomNode } from './randomNode'
 
 export class NoiseNode extends RandomNode {

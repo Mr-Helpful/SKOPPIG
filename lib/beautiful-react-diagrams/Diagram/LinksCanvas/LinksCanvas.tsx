@@ -1,32 +1,27 @@
-import React, { useCallback } from 'react'
+import React from 'react'
 import DiagramLink from '../Link/DiagramLink'
 import DiagramSegment from '../Segment/DiagramSegment'
 import findInvolvedEntity from './findInvolvedEntity'
-import removeLink from './removeLinkFromArray'
-import { Node, Link, ClickEvent, Segment } from '../../shared/Types'
+import { useDiagramMethods } from '../MethodContext/MethodContext'
+
+import { Node, Link, Segment } from '../../shared/Types'
 
 interface LinksCanvasProps {
   nodes: Node[]
   segment: Segment
   links: Link[]
-  onDelete: (link: Link) => void
-  onLinkClick: (ev: ClickEvent, link: Link) => void
-  onCanvasClick: (ev: ClickEvent) => void
 }
 
 /**
  * Handles the links' events and business logic, wraps the links within a svg
  */
-const LinksCanvas = ({
-  nodes,
-  segment,
-  links,
-  onDelete,
-  onLinkClick,
-  onCanvasClick
-}: LinksCanvasProps) => {
+const LinksCanvas = ({ nodes, segment, links }: LinksCanvasProps) => {
+  const methods = useDiagramMethods()
   return (
-    <div onClick={onCanvasClick} className="bi bi-link-canvas-layer">
+    <div
+      onClick={ev => methods.config?.onCanvasClick(ev)}
+      className="bi bi-link-canvas-layer"
+    >
       <svg>
         {links &&
           links.length > 0 &&
@@ -38,8 +33,6 @@ const LinksCanvas = ({
                 link={link}
                 input={entityIn}
                 output={entityOut}
-                onDelete={onDelete}
-                onLinkClick={onLinkClick}
                 key={`${entityIn.entity.id}-${entityOut.entity.id}`}
               />
             )

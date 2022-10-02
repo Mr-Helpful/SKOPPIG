@@ -1,6 +1,7 @@
-import { ElementObject } from '../../shared/Types'
 import getRelativePoint from '../../shared/functions/getRelativePoint'
 import { DiagramEntity } from '../LinksCanvas/findInvolvedEntity'
+
+import { ElementObject } from '../../shared/Types'
 
 /**
  * Return the coordinates of a given entity (node or port)

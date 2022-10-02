@@ -16,7 +16,8 @@
     ".vscode": true,
     ".github": true,
     "build": true,
-    "node_modules": true
+    "node_modules": true,
+    ".next": true
   },
   "explorerExclude.backup": {},
   "findUnusedExports.detectCircularImports": true

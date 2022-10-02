@@ -8,8 +8,9 @@ import React, {
 import useWindowScroll from 'beautiful-react-hooks/useWindowScroll'
 import useWindowResize from 'beautiful-react-hooks/useWindowResize'
 import classNames from 'classnames'
-import { defaultContent, ElementObject } from '../../shared/Types'
-import DiagramContext from '../../Context/DiagramContext'
+import DiagramProvider from '../../Context/DiagramContext'
+
+import { ElementObject } from '../../shared/Types'
 
 interface DiagramCanvasProps extends HTMLAttributes<HTMLDivElement> {
   portRefs: ElementObject
@@ -24,13 +25,13 @@ interface DiagramCanvasProps extends HTMLAttributes<HTMLDivElement> {
 const DiagramCanvas = ({
   portRefs,
   nodeRefs,
-  children = defaultContent,
+  children,
   className = '',
   ...rest
 }: DiagramCanvasProps) => {
   const [bbox, setBoundingBox] = useState<DOMRect | null>(null)
   const canvasRef = useRef<HTMLDivElement>(null)
-  const classList = classNames('bi bi-diagram', className)
+  const classList = classNames('bi bi-diagram ', className)
 
   // calculate the given element bounding box and save it into the bbox state
   const calculateBBox = useCallback(
@@ -60,11 +61,11 @@ const DiagramCanvas = ({
   return (
     <div className={classList} ref={canvasRef} {...rest}>
       <div className="bi-diagram-canvas">
-        <DiagramContext.Provider
+        <DiagramProvider
           value={{ canvas: bbox, ports: portRefs, nodes: nodeRefs }}
         >
           {children}
-        </DiagramContext.Provider>
+        </DiagramProvider>
       </div>
     </div>
   )

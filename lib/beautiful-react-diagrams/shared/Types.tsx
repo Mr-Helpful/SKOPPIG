@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { FC, ReactNode } from 'react'
 
 /*----------------------------------------------------------------
 -                        Typescript types                        -
@@ -31,9 +31,10 @@ export type Port = {
   className?: string
 }
 
-/** Node type */
+/** Generic coordinate type and some operations on it */
 export type Coords = [number, number]
 
+/** Node type */
 export type Node = {
   id: string
   coordinates: Coords
@@ -43,18 +44,18 @@ export type Node = {
   inputs?: Port[]
   outputs?: Port[]
   type?: 'default'
-  render?: NodeRender
+  Render?: NodeRender
   className?: string
   collapsed?: Schema
   data?: any
 }
 
-type NodeRender = (
-  props: Omit<Node, 'coordinates' | 'inputs' | 'outputs'> & {
+export type NodeRender = FC<
+  Omit<Node, 'coordinates' | 'inputs' | 'outputs'> & {
     inputs: ReactNode[]
     outputs: ReactNode[]
   }
-) => ReactNode
+>
 
 /** Schema type */
 export type Schema = {

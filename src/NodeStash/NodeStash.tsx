@@ -1,23 +1,59 @@
 import styles from './NodeStash.module.scss'
-import React from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Node } from '../../lib/beautiful-react-diagrams'
-import DiagramNode, {
-  DiagramNodeProps
-} from '../../lib/beautiful-react-diagrams/Diagram/DiagramNode/DiagramNode'
+import DiagramNode from '../../lib/beautiful-react-diagrams/Diagram/DiagramNode/DiagramNode'
+import DiagramProvider from '../../lib/beautiful-react-diagrams/Context/DiagramContext'
+import MethodProvider from '../../lib/beautiful-react-diagrams/Diagram/MethodContext/MethodContext'
+import { defaultConfig } from '../../lib/beautiful-react-diagrams/Diagram/Diagram'
+import RenderNodes from '../BrushNode/renderNodes'
+import { Coords } from '../../lib/beautiful-react-diagrams/shared/Types'
 
-const callbacks: Omit<DiagramNodeProps, keyof Node> = {
-  onDragNewSegment(id, from, to, alignment?) {},
-  onMount(id, el) {},
-  onNodeClick(ev, node) {},
-  onNodeRemove(id, inputs, outputs) {},
-  onPortRegister(id, el) {},
-  onPositionChange(id, offset) {},
-  onSegmentConnect(input, output) {},
-  onSegmentFail(id, type) {}
-}
+const dims: Coords = [100, 100]
+const pos: Coords = [200, 200]
+
+type RenderClass = typeof RenderNodes[number]
 
 interface NodeStashProps {
-  nodes: Node[]
+  nodes: RenderClass[]
+  addOne: (node: Node) => void
+}
+
+const defaultDOMRect: DOMRect = {
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+  bottom: 0,
+  left: 0,
+  top: 0,
+  right: 0,
+  toJSON() {
+    return JSON.stringify(defaultDOMRect)
+  }
+}
+
+/** Returns a function that can be used to assign unique ids to any node it is
+ * called with and its ports
+ */
+const useIdAssigner = () => {
+  const nId = useRef(0)
+  const pId = useRef(0)
+
+  return useCallback(
+    ({ id, inputs, outputs, ...node }: Node): Node => ({
+      id: `node-${nId.current++}`,
+      inputs: (inputs ?? []).map(({ id, ...port }) => ({
+        id: `port-${pId.current++}`,
+        ...port
+      })),
+      outputs: (outputs ?? []).map(({ id, ...port }) => ({
+        id: `port-${pId.current++}`,
+        ...port
+      })),
+      ...node
+    }),
+    []
+  )
 }
 
 /** A Temporary store for brush nodes
@@ -25,20 +61,47 @@ interface NodeStashProps {
 [ ] Dragging from stash to diagram
 [ ] Dragging from diagram to stash
  */
-const NodeStash = ({ nodes }: NodeStashProps) => {
+const NodeStash = ({ nodes, addOne }: NodeStashProps) => {
+  const assigner = useIdAssigner()
+  const [displayed, setDisplayed] = useState([])
+  const createNode = useCallback(
+    (Renderer: RenderClass) => assigner(new Renderer(dims).toNode(pos)),
+    [assigner]
+  )
+
+  // make sure that we'll only load our stash nodes
+  // when we have a document object available
+  useEffect(() => {
+    setDisplayed(nodes.map(createNode))
+  }, [nodes, createNode])
+
   return (
-    <div className={styles.diagramMenu}>
-      {nodes.map(({ className = '', ...node }) => {
-        className += ' ' + styles.staticNode
-        return (
-          <DiagramNode
-            key={node.id}
-            className={className}
-            {...node}
-            {...callbacks}
-          />
-        )
-      })}
+    <div className={styles.nodeStash}>
+      <DiagramProvider
+        value={{
+          canvas: defaultDOMRect,
+          ports: {},
+          nodes: {}
+        }}
+      >
+        <MethodProvider
+          value={{
+            schema: { nodes: [], links: [] },
+            config: {
+              ...defaultConfig,
+              onNodeClick(_, { data: { instance } }) {
+                addOne(createNode(instance.constructor))
+              }
+            },
+            setSegment() {}
+          }}
+        >
+          {displayed.map(({ className = '', ...node }) => {
+            className += ' ' + styles.staticNode
+            return <DiagramNode key={node.id} className={className} {...node} />
+          })}
+        </MethodProvider>
+      </DiagramProvider>
     </div>
   )
 }

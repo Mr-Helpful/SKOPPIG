@@ -2,7 +2,7 @@
   position: block;
 }
 
-.diagramMenu {
+.nodeStash {
   position: absolute;
   z-index: 2;
   padding: 0.5rem;
@@ -11,6 +11,9 @@
   left: 0rem;
   margin-left: 0.25rem;
   transform: translateY(-50%);
+  max-height: 80%;
+
+  overflow-y: scroll;
 
   background-color: #ffffff;
   border: 0.07rem solid #dae1e7;

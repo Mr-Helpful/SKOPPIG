@@ -1,33 +1,28 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import classNames from 'classnames'
-import usePortRefs from '../../shared/internal_hooks/usePortRefs'
-import useCanvas from '../../shared/internal_hooks/useCanvas'
+import { usePortRefs } from '../../Context/DiagramContext'
+import { useCanvas } from '../../Context/DiagramContext'
 import getCoords from './getEntityCoordinates'
 import makeSvgPath from '../../shared/functions/makeSvgPath'
 import getPathMidpoint from '../../shared/functions/getPathMidpoint'
-import useNodeRefs from '../../shared/internal_hooks/useNodeRefs'
+import { useNodeRefs } from '../../Context/DiagramContext'
 import LinkLabel from './LinkLabel'
 import { DiagramEntity } from '../LinksCanvas/findInvolvedEntity'
+import { useDiagramMethods } from '../MethodContext/MethodContext'
+
 import { Link, ClickEvent } from '../../shared/Types'
 
 interface LinkProps {
   input: DiagramEntity
   output: DiagramEntity
   link: Link
-  onDelete: (link: Link) => void
-  onLinkClick: (ev: ClickEvent, link: Link) => void
 }
 
 /**
  * A Diagram link component displays the link between two diagram nodes or two node ports.
  */
-const DiagramLink = ({
-  input,
-  output,
-  link,
-  onDelete,
-  onLinkClick
-}: LinkProps) => {
+const DiagramLink = ({ input, output, link }: LinkProps) => {
+  const methods = useDiagramMethods()
   const pathRef = useRef<SVGPathElement>(null)
   const canvas = useCanvas()
   const nodeRefs = useNodeRefs()
@@ -79,9 +74,16 @@ const DiagramLink = ({
   }, [pathRef, link.label, inputPoint, outputPoint])
 
   // on link delete
-  const onDoubleClick = useCallback(() => {
-    if (onDelete && !link.readonly) onDelete(link)
-  }, [link, onDelete])
+  const onDoubleClick = useCallback(
+    () => methods.onLinkDelete(link),
+    [link, methods]
+  )
+
+  // on link click
+  const onClick = useCallback(
+    (ev: unknown) => methods.config?.onLinkClick(ev as ClickEvent, link),
+    [link, methods]
+  )
 
   return (
     <g className={classList}>
@@ -89,7 +91,7 @@ const DiagramLink = ({
         <path
           d={path}
           className="bi-link-ghost"
-          onClick={ev => onLinkClick(ev as unknown as ClickEvent, link)}
+          onClick={onClick}
           onDoubleClick={onDoubleClick}
         />
       )}
@@ -97,7 +99,7 @@ const DiagramLink = ({
         d={path}
         ref={pathRef}
         className="bi-link-path"
-        onClick={ev => onLinkClick(ev as unknown as ClickEvent, link)}
+        onClick={onClick}
         onDoubleClick={onDoubleClick}
       />
       {link.label && labelPosition && (

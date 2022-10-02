@@ -4,7 +4,7 @@ import Head from 'next/head'
 import NodeModal from '../src/BrushModal/NodeModal'
 
 export default function Home() {
-  const [elem, setElem] = useState<HTMLElement>(null)
+  const [menuElem, setMenuElem] = useState<HTMLElement>(null)
 
   return (
     <div>
@@ -16,7 +16,7 @@ export default function Home() {
 
       <main>
         <div
-          onClick={ev => setElem(ev.target as HTMLElement)}
+          onClick={ev => setMenuElem(ev.target as HTMLElement)}
           style={{
             width: '60px',
             height: '60px',
@@ -25,7 +25,7 @@ export default function Home() {
         >
           Get menu
         </div>
-        <NodeModal elem={elem} close={() => setElem(null)} />
+        <NodeModal elem={menuElem} close={() => setMenuElem(null)} />
       </main>
     </div>
   )

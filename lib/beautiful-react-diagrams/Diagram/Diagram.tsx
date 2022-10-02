@@ -1,30 +1,22 @@
-import React, {
-  useCallback,
-  useState,
-  useRef,
-  useEffect,
-  HTMLAttributes
-} from 'react'
+import React, { useState, useRef, useEffect, HTMLAttributes } from 'react'
 import DiagramCanvas from './DiagramCanvas/DiagramCanvas'
 import NodesCanvas from './NodesCanvas/NodesCanvas'
 import LinksCanvas from './LinksCanvas/LinksCanvas'
-import removeLink from './LinksCanvas/removeLinkFromArray'
+import MethodProvider from './MethodContext/MethodContext'
 
 import {
   Segment,
   Link,
   Node,
-  PortAlignment,
   Schema,
   ElementObject,
   defaultSchema,
   vacuouslyTrue,
   ClickEvent
 } from '../shared/Types'
+import { diagram } from '../../development/diagram'
 
-interface Config {
-  /** A ref to fill with a debug callback */
-  displayRef?: { current: () => void }
+export interface DiagramConfig {
   /** Whether a link should be added to the schema */
   shouldLink?: (link: Link, schema: Schema) => boolean
 
@@ -41,8 +33,7 @@ interface Config {
   onCanvasClick?: (ev: ClickEvent) => void
 }
 
-const defaultConfig: Config = {
-  displayRef: { current: () => {} },
+export const defaultConfig: DiagramConfig = {
   shouldLink: vacuouslyTrue,
 
   onConnect(link) {},
@@ -54,7 +45,7 @@ const defaultConfig: Config = {
 }
 
 interface DiagramProps
-  extends Config,
+  extends DiagramConfig,
     Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   /**
    * The diagram current schema
@@ -76,7 +67,6 @@ interface DiagramProps
 const Diagram = ({
   schema = defaultSchema,
   onChange = undefined,
-  displayRef = defaultConfig.displayRef,
   shouldLink = defaultConfig.shouldLink,
 
   onConnect = defaultConfig.onConnect,
@@ -92,114 +82,52 @@ const Diagram = ({
   const { current: nodeElems } = useRef<ElementObject>({}) // keeps the node elements references
 
   useEffect(() => {
-    displayRef.current = () => {
-      console.group('%cNew references', 'color: green')
+    diagram.showRefs = () => {
+      console.groupCollapsed('%cNew references', 'color: green')
+      const maxLength = Math.max(
+        ...Object.keys(portElems).map(s => s.length),
+        ...Object.keys(portElems).map(s => s.length)
+      )
+      console.groupCollapsed('%cPort references', 'color: green')
       for (let id in portElems) {
-        console.log(id)
-        console.log(portElems[id])
+        const key = id.padEnd(maxLength)
+        console.log(key, portElems[id])
       }
+      console.groupEnd()
+      console.groupCollapsed('%cNode references', 'color: green')
       for (let id in nodeElems) {
-        console.log(id)
-        console.log(nodeElems[id])
+        const key = id.padEnd(maxLength)
+        console.log(key, nodeElems[id])
       }
+      console.groupEnd()
       console.groupEnd()
     }
   })
 
-  // when nodes change, performs the onChange callback with the new incoming data
-  const onNodesChange = (nextNodes: Node[]) => {
-    if (onChange) onChange({ nodes: nextNodes })
-  }
-
-  // when a port is registered, save it to the local reference
-  const onPortRegister = useCallback(
-    (portId: string, portEl: HTMLElement) => {
-      portElems[portId] = portEl
-    },
-    [portElems]
-  )
-
-  // when a node is registered, save it to the local reference
-  const onNodeRegister = useCallback(
-    (nodeId: string, nodeEl: HTMLElement) => {
-      nodeElems[nodeId] = nodeEl
-    },
-    [nodeElems]
-  )
-
-  // when a node is deleted, remove its references
-  const onNodeRemove = useCallback(
-    (nodeId: string, inputsPorts: string[], outputsPorts: string[]) => {
-      delete nodeElems[nodeId]
-      inputsPorts.forEach(input => delete portElems[input])
-      outputsPorts.forEach(output => delete portElems[output])
-    },
-    [nodeElems, portElems]
-  )
-
-  // when a new segment is dragged, save it to the local state
-  const onDragNewSegment = useCallback(
-    (
-      portId: string,
-      from: [number, number],
-      to: [number, number],
-      alignment?: PortAlignment
-    ) => {
-      setSegment({ id: `segment-${portId}`, from, to, alignment })
-    },
-    []
-  )
-
-  // when a segment fails to connect, reset the segment state
-  const onSegmentFail = useCallback(() => {
-    setSegment(undefined)
-  }, [])
-
-  // when a segment connects, update the links schema, perform the onChange callback
-  // with the new data, then reset the segment state
-  const onSegmentConnect = (input: string, output: string) => {
-    if (shouldLink({ input, output }, schema)) {
-      const nextLinks: Link[] = [...(schema.links || []), { input, output }]
-      if (onChange) onChange({ links: nextLinks })
-      onConnect({ input, output })
-    }
-    setSegment(undefined)
-  }
-
-  // when links change, performs the onChange callback with the new incoming data
-
-  const onLinkDelete = useCallback(
-    ({ input, output }: Link) => {
-      if (schema.links.length > 0 && onChange) {
-        const nextLinks = removeLink({ input, output }, schema.links)
-        if (onChange) onChange({ links: nextLinks })
-        onDisconnect({ input, output })
-      }
-    },
-    [schema, onChange, onDisconnect]
-  )
-
   return (
     <DiagramCanvas portRefs={portElems} nodeRefs={nodeElems} {...rest}>
-      <NodesCanvas
-        nodes={schema.nodes}
-        onChange={onNodesChange}
-        onNodeRegister={onNodeRegister}
-        onPortRegister={onPortRegister}
-        onNodeRemove={onNodeRemove}
-        onDragNewSegment={onDragNewSegment}
-        onSegmentFail={onSegmentFail}
-        onSegmentConnect={onSegmentConnect}
-        onNodeClick={onNodeClick}
-      />
-      <LinksCanvas
-        nodes={schema.nodes}
-        links={schema.links}
-        segment={segment!}
-        onDelete={onLinkDelete}
-        onLinkClick={onLinkClick}
-        onCanvasClick={onCanvasClick}
-      />
+      <MethodProvider
+        value={{
+          schema,
+          config: {
+            shouldLink,
+            onConnect,
+            onDisconnect,
+            onNodeClick,
+            onLinkClick,
+            onCanvasClick
+          },
+          onChange,
+          setSegment
+        }}
+      >
+        <NodesCanvas nodes={schema.nodes} />
+        <LinksCanvas
+          nodes={schema.nodes}
+          links={schema.links}
+          segment={segment}
+        />
+      </MethodProvider>
     </DiagramCanvas>
   )
 }

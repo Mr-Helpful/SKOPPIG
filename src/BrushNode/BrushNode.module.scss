@@ -11,6 +11,8 @@
     display: flex;
     justify-content: space-evenly;
 
+    height: $port-radius;
+
     &>* {
       @extend .circlePort;
       z-index: 1;

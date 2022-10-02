@@ -1,3 +1,14 @@
 export * from './renderNode'
-export * from './randomNodes'
-export * from './sourceNodes'
+
+import * as FilterNodes from './filterNodes'
+import * as MergeNodes from './mergeNodes'
+import * as RandomNodes from './randomNodes'
+import * as SourceNodes from './sourceNodes'
+
+const RenderNodes = Object.values({
+  ...FilterNodes,
+  ...MergeNodes,
+  ...RandomNodes,
+  ...SourceNodes
+})
+export default RenderNodes

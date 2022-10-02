@@ -12,7 +12,7 @@ export abstract class RandomNode extends RenderNode {
     return v - Math.floor(v)
   }
 
-  menu() {
+  Menu() {
     return <div></div>
   }
 }

@@ -125,7 +125,7 @@ const splitNodes = (
 const splitLinks = (
   ids: Set<string>,
   { nodes, links }: Schema
-): { inLinks: Link[]; outLinks: Link[] } => {
+): { inLinks: Link[]; midLinks: Link[]; outLinks: Link[] } => {
   let inPorts: IdMap = {}
   let outPorts: IdMap = {}
   for (const node of nodes)
@@ -135,15 +135,25 @@ const splitLinks = (
     }
 
   let inLinks: Link[] = []
+  let midLinks: Link[] = []
   let outLinks: Link[] = []
   for (const link of links) {
-    ;((link.input in inPorts && link.output in outPorts) ||
-    (link.output in inPorts && link.input in outPorts)
-      ? inLinks
-      : outLinks
-    ).push(link)
+    const inTests = [
+      link.input in inPorts,
+      link.input in outPorts,
+      link.output in inPorts,
+      link.output in outPorts
+    ]
+    let inCount = 0
+    for (let test of inTests) {
+      if (test) inCount += 1
+    }
+
+    if (inCount == 2) inLinks.push(link)
+    else if (inCount == 1) midLinks.push(link)
+    else outLinks.push(link)
   }
-  return { inLinks, outLinks }
+  return { inLinks, midLinks, outLinks }
 }
 
 /**
@@ -152,10 +162,14 @@ const splitLinks = (
  */
 export const splitSchema = (
   ids: Set<string>,
-  schema: Schema
+  schema: Schema,
+  includeMiddle: boolean = false
 ): { inSchema: Schema; outSchema: Schema } => {
   const { inNodes, outNodes } = splitNodes(ids, schema)
-  const { inLinks, outLinks } = splitLinks(ids, schema)
+  let { inLinks, midLinks, outLinks } = splitLinks(ids, schema)
+
+  if (includeMiddle) inLinks = [...inLinks, ...midLinks]
+  else outLinks = [...outLinks, ...midLinks]
   return {
     inSchema: { nodes: inNodes, links: inLinks },
     outSchema: { nodes: outNodes, links: outLinks }

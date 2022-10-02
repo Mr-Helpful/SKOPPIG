@@ -8,39 +8,26 @@ import {
 } from '../../shared/internal_hooks/useContextRegistration'
 import useDrag from '../../shared/internal_hooks/useDrag'
 import useNodeUnregistration from '../../shared/internal_hooks/useNodeUnregistration'
+import { useDiagramMethods } from '../MethodContext/MethodContext'
+
 import {
-  ClickEvent,
   defaultContent,
   defaultData,
   defaultPorts,
   defaultSchema,
   Node,
-  PortAlignment
+  NodeRender
 } from '../../shared/Types'
 
-export interface DiagramNodeProps extends Node {
-  /** The callback to be fired when position changes */
-  onPositionChange: (id: string, offset: [number, number]) => void
-  /** The callback to be fired when a new port is settled */
-  onPortRegister: (id: string, el: HTMLElement) => void
-  /** The callback to be fired when component unmount */
-  onNodeRemove: (id: string, inputs: string[], outputs: string[]) => void
-  /** The callback to be fired when dragging a new segment from one of the node's port */
-  onDragNewSegment: (
-    id: string,
-    from: [number, number],
-    to: [number, number],
-    alignment?: PortAlignment
-  ) => void
-  /** The callback to be fired when a new diagram is mounted */
-  onMount: (id: string, el: HTMLElement) => void
-  /** The callback to be fired when a new segment fails to connect */
-  onSegmentFail: (id: string, type: 'input' | 'output') => void
-  /** The callback to be fired when a new segment connects to a port */
-  onSegmentConnect: (input: string, output: string) => void
-  /** The callback to be fired when a node is selected */
-  onNodeClick: (ev: ClickEvent, node: Node) => void
-}
+const DefaultRender: NodeRender = ({ content, inputs, outputs }) => (
+  <>
+    {content}
+    <div className="bi-port-wrapper">
+      <div className="bi-input-ports">{inputs}</div>
+      <div className="bi-output-ports">{outputs}</div>
+    </div>
+  </>
+)
 
 /**
  * A Diagram Node component displays a single diagram node, handles the drag n drop business logic and fires the
@@ -57,121 +44,81 @@ const DiagramNode = ({
   inputs = defaultPorts,
   outputs = defaultPorts,
   type = 'default',
-  render = undefined,
+  Render = DefaultRender,
   className = '',
   collapsed = defaultSchema,
-  data = defaultData,
-  // callbacks from parents
-  onPositionChange,
-  onPortRegister,
-  onNodeRemove,
-  onDragNewSegment,
-  onMount,
-  onSegmentFail,
-  onSegmentConnect,
-  onNodeClick
-}: DiagramNodeProps) => {
-  const clickSensitivity = 5
-  const registerPort = usePortRegistration(inputs, outputs, onPortRegister) // get the port registration method
+  data = defaultData
+}: Node) => {
+  const methods = useDiagramMethods()
   const ref = useRef<HTMLDivElement>()
   const { onDragStart, onDrag, onDragEnd } = useDrag(ref, {
     throttleBy: 14
   }) // get the drag n drop methods
-  const triggerClick = useRef(false) // whether a node has been move little enough to consider this a click event
   const dragStartPoint = useRef(coordinates) // keeps the drag start point in a persistent reference
 
   if (!disableDrag) {
     // when drag starts, save the starting coordinates into the `dragStartPoint` ref
-    onDragStart(() => {
+    onDragStart(event => {
       dragStartPoint.current = coordinates
-      triggerClick.current = true
+      methods.config?.onNodeClick(event, {
+        id,
+        coordinates,
+        selected,
+        disableDrag,
+        content,
+        inputs,
+        outputs,
+        type,
+        Render,
+        className,
+        collapsed,
+        data
+      })
     })
 
     // whilst dragging calculates the next coordinates and perform the `onPositionChange` callback
     onDrag((event, info) => {
-      if (onPositionChange) {
-        event.nativeEvent.stopImmediatePropagation()
-        event.stopPropagation()
-        const [ox, oy] = info.offset!
-        const dist = ox * ox + oy * oy
-        if (dist > clickSensitivity * clickSensitivity)
-          triggerClick.current = false
+      event.nativeEvent.stopImmediatePropagation()
+      event.stopPropagation()
 
-        const nextCoords: [number, number] = [
-          dragStartPoint.current[0] - info.offset![0],
-          dragStartPoint.current[1] - info.offset![1]
-        ]
-        onPositionChange(id, nextCoords)
-      }
+      const nextCoords: [number, number] = [
+        dragStartPoint.current[0] - info.offset![0],
+        dragStartPoint.current[1] - info.offset![1]
+      ]
+      methods.onNodePositionUpdate(id, nextCoords)
     })
   }
 
   onDragEnd((event, info) => {
-    if (onPositionChange) {
-      event.nativeEvent.stopImmediatePropagation()
-      event.stopPropagation()
-      const offset = info.offset || [0, 0]
-      const nextCoords: [number, number] = [
-        dragStartPoint.current[0] - offset[0],
-        dragStartPoint.current[1] - offset[1]
-      ]
-      onPositionChange(id, nextCoords)
-      if (triggerClick.current)
-        onNodeClick(event, {
-          id,
-          coordinates,
-          selected,
-          disableDrag,
-          content,
-          inputs,
-          outputs,
-          type,
-          render,
-          className,
-          collapsed,
-          data
-        })
-    }
+    event.nativeEvent.stopImmediatePropagation()
+    event.stopPropagation()
+    const offset = info.offset || [0, 0]
+    const nextCoords: [number, number] = [
+      dragStartPoint.current[0] - offset[0],
+      dragStartPoint.current[1] - offset[1]
+    ]
+    methods.onNodePositionUpdate(id, nextCoords)
   })
 
   // on component unmount, remove its references
-  useNodeUnregistration(onNodeRemove, inputs, outputs, id)
+  useNodeUnregistration(
+    (id, inputs, outputs) => methods.onNodeRemove(id, inputs, outputs),
+    inputs,
+    outputs,
+    id
+  )
 
   // perform the onMount callback when the node is allowed to register
-  useNodeRegistration(ref, onMount, id)
+  useNodeRegistration(ref, methods.onNodeRegister, id)
 
   const classList = useMemo(
-    () =>
-      classNames(
-        'bi bi-diagram-node',
-        {
-          [`bi-diagram-node-${type}`]: !!type && !render
-        },
-        className
-      ),
-    [type, render, className]
+    () => classNames('bi bi-diagram-node', className),
+    [className]
   )
 
   // generate ports
-  const options = {
-    registerPort,
-    onDragNewSegment,
-    onSegmentFail,
-    onSegmentConnect
-  }
-  const InputPorts = inputs.map(portGenerator(options, 'input'))
-  const OutputPorts = outputs.map(portGenerator(options, 'output'))
-  const customRenderProps = {
-    id,
-    content,
-    type,
-    inputs: InputPorts,
-    outputs: OutputPorts,
-    data,
-    className,
-    collapsed,
-    selected
-  }
+  const InputPorts = inputs.map(portGenerator('input'))
+  const OutputPorts = outputs.map(portGenerator('output'))
 
   return (
     <div
@@ -180,16 +127,17 @@ const DiagramNode = ({
       ref={ref}
       style={getDiagramNodeStyle(coordinates, disableDrag)}
     >
-      {render && typeof render === 'function' && render(customRenderProps)}
-      {!render && (
-        <>
-          {content}
-          <div className="bi-port-wrapper">
-            <div className="bi-input-ports">{InputPorts}</div>
-            <div className="bi-output-ports">{OutputPorts}</div>
-          </div>
-        </>
-      )}
+      <Render
+        id={id}
+        content={content}
+        type={type}
+        inputs={InputPorts}
+        outputs={OutputPorts}
+        data={data}
+        className={className}
+        collapsed={collapsed}
+        selected={selected}
+      />
     </div>
   )
 }

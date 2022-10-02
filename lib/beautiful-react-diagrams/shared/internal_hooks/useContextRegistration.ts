@@ -1,6 +1,6 @@
 import { MutableRefObject } from 'react'
 import { useCallback, useEffect, useContext } from 'react'
-import DiagramContext from '../../Context/DiagramContext'
+import { DiagramContext } from '../../Context/DiagramContext'
 import { Port } from '../Types'
 
 /**

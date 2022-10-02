@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import Diagram, {
   createSchema,
   Schema,
@@ -6,34 +6,13 @@ import Diagram, {
   Node,
   Link
 } from '../../lib/beautiful-react-diagrams'
-import BrushNode from '../BrushNode/BrushNode'
 import DiagramMenu from '../DiagramMenu/DiagramMenu'
 import NodeStash from '../NodeStash/NodeStash'
 import { ModalBackground } from './Modal'
-import { RiImage2Line } from 'react-icons/ri'
 import { cycleWith } from '../DiagramMenu/schemaMethods'
 import { ClickEvent } from '../../lib/beautiful-react-diagrams/shared/Types'
-
-const defaultNodes: Node[] = [
-  {
-    id: '',
-    content: <RiImage2Line size={50} />,
-    coordinates: [125, 250],
-    selected: false,
-    inputs: new Array(2).fill(0).map((_, i) => ({
-      id: '',
-      alignment: 'bottom'
-    })),
-    outputs: new Array(1).fill(0).map((_, i) => ({
-      id: '',
-      alignment: 'top'
-    })),
-    render: BrushNode,
-    data: {}
-  }
-]
-
-const unusedNode: Node = { id: undefined, coordinates: [0, 0] }
+import StashNodes from '../BrushNode/renderNodes'
+import { diagram } from '../../lib/development/diagram'
 
 /** Returns a function that can be used to assign unique ids to any node it is
  * called with and its ports
@@ -55,7 +34,7 @@ const useIdAssigner = () => {
       })),
       ...node
     }),
-    [nId, pId]
+    []
   )
 }
 
@@ -70,17 +49,41 @@ const noCycles = (link: Link, { nodes, links }: Schema) => {
   return !cycleWith([id], { nodes, links: [link, ...links] })
 }
 
+const notSameType = ({ input, output }: Link, { nodes }: Schema) => {
+  // determines the type of a port (i.e. input or output)
+  const portType = portId => {
+    for (const { inputs, outputs } of nodes) {
+      for (const { id } of inputs) if (id === portId) return 'input'
+      for (const { id } of outputs) if (id === portId) return 'output'
+    }
+    throw Error('Port id not found in schema')
+  }
+  return portType(input) !== portType(output)
+}
+
+const shouldLink = (link: Link, schema: Schema) =>
+  noCycles(link, schema) && notSameType(link, schema)
+
 const ModalContent = () => {
   const startSchema = createSchema({})
-  const [schema, { onChange, addNode, connect }] = useSchema(startSchema)
-  const display = useRef(() => {})
+  const [schema, { onChange, addNode }] = useSchema(startSchema)
 
-  // how to generate a new node in the diagram
-  const assigner = useIdAssigner()
-  const addOne = useCallback(
-    () => addNode(assigner(defaultNodes[0])),
-    [addNode, assigner]
-  )
+  useEffect(() => {
+    diagram.logSchema = () => {
+      console.groupCollapsed('%cNew Schema', 'color: green')
+      console.groupCollapsed('%cNodes', 'color: green')
+      for (const node of schema.nodes) {
+        console.log(node)
+      }
+      console.groupEnd()
+      console.groupCollapsed('%cLinks', 'color: green')
+      for (const link of schema.links) {
+        console.log(link)
+      }
+      console.groupEnd()
+      console.groupEnd()
+    }
+  }, [schema])
 
   // whether to select multiple nodes at once
   const onNodeSelect = useCallback(
@@ -114,17 +117,19 @@ const ModalContent = () => {
   return (
     <>
       <DiagramMenu schema={schema} onChange={onChange} />
-      <NodeStash nodes={defaultNodes.map(assigner)} />
-      <div onClick={addOne}>Add a node!</div>
-      <div onClick={display.current}>Show the refs!</div>
+      <NodeStash nodes={StashNodes} addOne={addNode} />
       <ModalBackground>
         <Diagram
           schema={schema}
           onChange={onChange}
-          displayRef={display}
-          shouldLink={noCycles}
+          shouldLink={shouldLink}
           onNodeClick={onNodeSelect}
-          onCanvasClick={ev => onNodeSelect(ev, unusedNode)}
+          onCanvasClick={ev =>
+            onNodeSelect(ev, {
+              id: '',
+              coordinates: [0, 0]
+            })
+          }
         />
       </ModalBackground>
     </>
