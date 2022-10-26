@@ -6,9 +6,9 @@ import DiagramProvider from '../../lib/beautiful-react-diagrams/Context/DiagramC
 import MethodProvider from '../../lib/beautiful-react-diagrams/Diagram/MethodContext/MethodContext'
 import { defaultConfig } from '../../lib/beautiful-react-diagrams/Diagram/Diagram'
 import RenderNodes from '../BrushNode/renderNodes'
-import { Coords } from '../../lib/beautiful-react-diagrams/shared/Types'
+import { Coords, Schema } from '../../lib/beautiful-react-diagrams/shared/Types'
 
-const dims: Coords = [100, 100]
+const dims: Coords = [50, 50]
 const pos: Coords = [200, 200]
 
 type RenderClass = typeof RenderNodes[number]
@@ -32,6 +32,11 @@ const defaultDOMRect: DOMRect = {
   }
 }
 
+const defaultSchema: Schema = {
+  nodes: [],
+  links: []
+}
+
 /** Returns a function that can be used to assign unique ids to any node it is
  * called with and its ports
  */
@@ -39,21 +44,17 @@ const useIdAssigner = () => {
   const nId = useRef(0)
   const pId = useRef(0)
 
-  return useCallback(
-    ({ id, inputs, outputs, ...node }: Node): Node => ({
-      id: `node-${nId.current++}`,
-      inputs: (inputs ?? []).map(({ id, ...port }) => ({
-        id: `port-${pId.current++}`,
-        ...port
-      })),
-      outputs: (outputs ?? []).map(({ id, ...port }) => ({
-        id: `port-${pId.current++}`,
-        ...port
-      })),
-      ...node
-    }),
-    []
-  )
+  return useCallback(({ ...node }: Node): Node => {
+    if (node.inputs)
+      node.inputs = node.inputs.map(port => {
+        return { ...port, id: `port-${pId.current++}` }
+      })
+    if (node.outputs)
+      node.outputs = node.outputs.map(port => {
+        return { ...port, id: `port-${pId.current++}` }
+      })
+    return { ...node, id: `node-${nId.current++}` }
+  }, [])
 }
 
 /** A Temporary store for brush nodes
@@ -86,7 +87,7 @@ const NodeStash = ({ nodes, addOne }: NodeStashProps) => {
       >
         <MethodProvider
           value={{
-            schema: { nodes: [], links: [] },
+            schema: defaultSchema,
             config: {
               ...defaultConfig,
               onNodeClick(_, { data: { instance } }) {

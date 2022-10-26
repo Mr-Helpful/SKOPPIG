@@ -14,7 +14,7 @@
     "**/_esy": true,
     "**/.esy": true,
     ".vscode": true,
-    ".github": true,
+    ".github": false,
     "build": true,
     "node_modules": true,
     ".next": true

@@ -11,32 +11,8 @@ import NodeStash from '../NodeStash/NodeStash'
 import { ModalBackground } from './Modal'
 import { cycleWith } from '../DiagramMenu/schemaMethods'
 import { ClickEvent } from '../../lib/beautiful-react-diagrams/shared/Types'
-import StashNodes from '../BrushNode/renderNodes'
+import StashNodes, { RenderEvent, RenderNode } from '../BrushNode/renderNodes'
 import { diagram } from '../../lib/development/diagram'
-
-/** Returns a function that can be used to assign unique ids to any node it is
- * called with and its ports
- */
-const useIdAssigner = () => {
-  const nId = useRef(0)
-  const pId = useRef(0)
-
-  return useCallback(
-    ({ id, inputs, outputs, ...node }: Node): Node => ({
-      id: `node-${nId.current++}`,
-      inputs: (inputs ?? []).map(({ id, ...port }) => ({
-        id: `port-${pId.current++}`,
-        ...port
-      })),
-      outputs: (outputs ?? []).map(({ id, ...port }) => ({
-        id: `port-${pId.current++}`,
-        ...port
-      })),
-      ...node
-    }),
-    []
-  )
-}
 
 const noCycles = (link: Link, { nodes, links }: Schema) => {
   // find either of the nodes the link connects
@@ -63,6 +39,15 @@ const notSameType = ({ input, output }: Link, { nodes }: Schema) => {
 
 const shouldLink = (link: Link, schema: Schema) =>
   noCycles(link, schema) && notSameType(link, schema)
+
+const findNode = (nodes: Node[], eId: string): Node => {
+  return nodes.find(
+    ({ id, inputs, outputs }: Node) =>
+      id === eId ||
+      inputs.some(({ id }) => id === eId) ||
+      outputs.some(({ id }) => id === eId)
+  )
+}
 
 const ModalContent = () => {
   const startSchema = createSchema({})
@@ -114,6 +99,23 @@ const ModalContent = () => {
     [schema, onChange]
   )
 
+  const onLinkMount = useCallback(
+    (link: Link) => {
+      console.log('link added: ', link)
+      const inputNode = findNode(schema.nodes, link.input)!
+      const outputNode = findNode(schema.nodes, link.output)!
+      const inputRender = inputNode.data.instance as RenderNode
+      const outputRender = outputNode.data.instance as RenderNode
+
+      const inIndex = inputNode.inputs.findIndex(({ id }) => id === link.input)
+      const onRender = (ev: RenderEvent) =>
+        inputRender.setSource(inIndex, ev.img)
+      outputRender.addEventListener('render', onRender)
+      return () => outputRender.removeEventListener('render', onRender)
+    },
+    [schema]
+  )
+
   return (
     <>
       <DiagramMenu schema={schema} onChange={onChange} />
@@ -123,6 +125,7 @@ const ModalContent = () => {
           schema={schema}
           onChange={onChange}
           shouldLink={shouldLink}
+          onLinkMount={onLinkMount}
           onNodeClick={onNodeSelect}
           onCanvasClick={ev =>
             onNodeSelect(ev, {

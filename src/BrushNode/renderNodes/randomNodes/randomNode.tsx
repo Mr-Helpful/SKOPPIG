@@ -2,7 +2,7 @@ import { RenderNode } from '../renderNode'
 
 const [sY, s0, s1] = [6.022, 12.9898, 43758.5453]
 export abstract class RandomNode extends RenderNode {
-  private seed: number = 1
+  protected seed: number = 1
 
   protected random(i: number): number
   protected random(x: number, y: number): number

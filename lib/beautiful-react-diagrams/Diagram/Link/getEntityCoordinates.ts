@@ -1,5 +1,5 @@
 import getRelativePoint from '../../shared/functions/getRelativePoint'
-import { DiagramEntity } from '../LinksCanvas/findInvolvedEntity'
+import { DiagramEntity, isNode } from '../LinksCanvas/findInvolvedEntity'
 
 import { ElementObject } from '../../shared/Types'
 
@@ -12,23 +12,18 @@ const getEntityCoordinates = (
   nodeRefs: ElementObject | null,
   canvas: DOMRect | null
 ): [number, number] | null => {
-  if (
-    entity &&
-    entity.type === 'node' &&
-    nodeRefs !== null &&
-    nodeRefs[entity.entity.id]
-  ) {
-    const nodeEl = nodeRefs[entity.entity.id]
+  if (isNode(entity) && nodeRefs !== null && nodeRefs[entity.id]) {
+    const nodeEl = nodeRefs[entity.id]
     const bbox = nodeEl.getBoundingClientRect()
     const res: [number, number] = [
-      entity.entity.coordinates[0] + bbox.width / 2,
-      entity.entity.coordinates[1] + bbox.height / 2
+      entity.coordinates[0] + bbox.width / 2,
+      entity.coordinates[1] + bbox.height / 2
     ]
     return res
   }
 
-  if (entity && portRefs && canvas !== null && portRefs[entity.entity.id]) {
-    const portEl = portRefs[entity.entity.id]
+  if (portRefs !== null && canvas !== null && portRefs[entity.id]) {
+    const portEl = portRefs[entity.id]
     const bbox = portEl.getBoundingClientRect()
 
     const res = getRelativePoint(

@@ -20,10 +20,10 @@ export interface DiagramConfig {
   /** Whether a link should be added to the schema */
   shouldLink?: (link: Link, schema: Schema) => boolean
 
-  /** A callback when an input and output are connected in the diagram */
-  onConnect?: (link: Link) => void
-  /** A callback when an input and output are disconnected in the diagram */
-  onDisconnect?: (link: Link) => void
+  /** A useEffect like hook for node mounting */
+  onNodeMount?: (node: Node) => void | (() => void)
+  /** A useEffect like hook for link mounting */
+  onLinkMount?: (link: Link) => void | (() => void)
 
   /** A callback for clicking on a node */
   onNodeClick?: (ev: ClickEvent, node: Node) => void
@@ -36,12 +36,12 @@ export interface DiagramConfig {
 export const defaultConfig: DiagramConfig = {
   shouldLink: vacuouslyTrue,
 
-  onConnect(link) {},
-  onDisconnect(link) {},
+  onNodeMount(_) {},
+  onLinkMount(_) {},
 
-  onNodeClick(ev, node) {},
-  onLinkClick(ev, link) {},
-  onCanvasClick(ev) {}
+  onNodeClick(_1, _2) {},
+  onLinkClick(_1, _2) {},
+  onCanvasClick(_) {}
 }
 
 interface DiagramProps
@@ -69,8 +69,8 @@ const Diagram = ({
   onChange = undefined,
   shouldLink = defaultConfig.shouldLink,
 
-  onConnect = defaultConfig.onConnect,
-  onDisconnect = defaultConfig.onDisconnect,
+  onNodeMount = defaultConfig.onNodeMount,
+  onLinkMount = defaultConfig.onLinkMount,
 
   onNodeClick = defaultConfig.onNodeClick,
   onLinkClick = defaultConfig.onLinkClick,
@@ -111,8 +111,8 @@ const Diagram = ({
           schema,
           config: {
             shouldLink,
-            onConnect,
-            onDisconnect,
+            onNodeMount,
+            onLinkMount,
             onNodeClick,
             onLinkClick,
             onCanvasClick

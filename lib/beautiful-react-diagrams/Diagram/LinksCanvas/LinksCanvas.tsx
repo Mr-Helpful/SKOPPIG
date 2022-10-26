@@ -23,20 +23,18 @@ const LinksCanvas = ({ nodes, segment, links }: LinksCanvasProps) => {
       className="bi bi-link-canvas-layer"
     >
       <svg>
-        {links &&
-          links.length > 0 &&
-          links.map(link => {
-            const entityIn = findInvolvedEntity(nodes, link.input)
-            const entityOut = findInvolvedEntity(nodes, link.output)
-            return (
-              <DiagramLink
-                link={link}
-                input={entityIn}
-                output={entityOut}
-                key={`${entityIn.entity.id}-${entityOut.entity.id}`}
-              />
-            )
-          })}
+        {links.map(link => {
+          const input = findInvolvedEntity(nodes, link.input)
+          const output = findInvolvedEntity(nodes, link.output)
+          return (
+            <DiagramLink
+              link={link}
+              input={input}
+              output={output}
+              key={`${input.id}-${output.id}`}
+            />
+          )
+        })}
         {segment && <DiagramSegment {...segment} />}
       </svg>
     </div>

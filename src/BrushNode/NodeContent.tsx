@@ -10,29 +10,35 @@ const NodeContent = ({ renderer }: NodeContentProps) => {
   const [failed, setFailed] = useState(true)
   const ref = useRef<HTMLCanvasElement>()
   useEffect(() => {
-    if (ref.current !== null) {
-      const ctx = ref.current.getContext('2d')
-      const onRender = (ev: RenderEvent) => {
-        if (ev.img === undefined) setFailed(true)
-        else {
-          ctx.putImageData(ev.img, 0, 0)
-          setFailed(false)
-        }
+    const onRender = (ev: RenderEvent) => {
+      if (ev.img === undefined) setFailed(true)
+      else if (ref.current !== null) {
+        const ctx = ref.current.getContext('2d')
+        ctx.putImageData(ev.img, 0, 0)
+        setFailed(false)
       }
+    }
 
-      onRender(new RenderEvent(renderer.img))
+    renderer.addEventListener('render', onRender)
+    renderer.render('gpu')
+    return () => {
       renderer.addEventListener('render', onRender)
-      return () => {
-        renderer.addEventListener('render', onRender)
-      }
     }
   }, [ref, renderer, setFailed])
 
   const [width, height] = renderer.dimensions
-  return failed ? (
-    <RiImage2Line width={width} height={height} />
-  ) : (
-    <canvas ref={ref} width={width} height={height} />
+  return (
+    <div title={renderer.constructor.name}>
+      <RiImage2Line
+        style={{ width, height, display: failed ? 'block' : 'none' }}
+      />
+      <canvas
+        ref={ref}
+        width={width}
+        height={height}
+        style={{ display: failed ? 'none' : 'block' }}
+      />
+    </div>
   )
 }
 

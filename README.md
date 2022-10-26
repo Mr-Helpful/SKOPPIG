@@ -13,9 +13,40 @@ The site can be separated into two main 'pages':
 
 This page is where the actual drawing is done, making use of the brushes created
 
-The main tools can be split into two categories:
+#### Brush
 
-#### Brush tools
+Just apply the brush to the created canvas
+
+#### Fill
+
+Flood fill an area by tiling a brush back to back and cropping
+
+#### Smart Fill
+
+Flood fill an area by using a [wfc](https://github.com/mxgmn/WaveFunctionCollapse) algorithm and cropping.
+
+```ts
+WFC_GPU(Canvas, Brush, N){
+  let C = Canvas.size()[0]
+  let B = Brush.size()[0]
+
+  let Sides = new Array<Number /*B-N bit set*/, [(B-N)**2, 4]>()
+  // Fill in the adjacency set
+
+}
+```
+
+It might be possible to do wfc via GPU (for canvas size C, brush size B, section size S):
+
+1. Precompute side hashes for each section of brush result - O((B/S)^2)
+2. Whilst maximum entropy > 0
+   1. Compute maximum + minimum entropy via GPU - O(logC)
+   2. If each cell has entropy = the minimum entropy, mark cell to update - O(1)
+   3. Whilst there are still cells to update
+
+#### Ruler
+
+Makes drawing straight lines easier by placing a limit on where can be drawn
 
 ### A Design page
 

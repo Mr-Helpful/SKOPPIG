@@ -20,14 +20,6 @@ export default class DiagramMethods {
   public portRefs: ElementObject
   public nodeRefs: ElementObject
 
-  constructor() {
-    for (let key in this) {
-      if (typeof this[key] === 'function') {
-        this[key] = (this[key] as Function).bind(this)
-      }
-    }
-  }
-
   /** Sets a new array of nodes in the schema
    * @param nodes the new nodes to set within the diagram
    */
@@ -49,11 +41,19 @@ export default class DiagramMethods {
     const [dx, dy] = [cx - sx, cy - sy]
 
     this.onNodesChange(
-      nodes.map(({ id, selected, disableDrag, coordinates, ...node }) => {
-        if ((id === nodeId || selected) && !disableDrag) {
-          coordinates = [coordinates[0] + dx, coordinates[1] + dy]
-        }
-        return { id, selected, disableDrag, coordinates, ...node }
+      nodes.map(node => {
+        if ((node.id !== nodeId && !node.selected) || node.disableDrag)
+          return node
+
+        let coordinates: [number, number] = [
+          node.coordinates[0] + dx,
+          node.coordinates[1] + dy
+        ]
+        // perform a shallow clone on all ports to ensure that react will
+        // re-render them.
+        if (node.inputs) node.inputs = node.inputs.map(port => ({ ...port }))
+        if (node.outputs) node.outputs = node.outputs.map(port => ({ ...port }))
+        return { ...node, coordinates }
       })
     )
   }
@@ -110,7 +110,6 @@ export default class DiagramMethods {
 
       this?.onChange({ links })
       this.setSegment(undefined)
-      this.config?.onConnect({ input, output })
     } else this.onSegmentFail()
   }
 
@@ -124,7 +123,6 @@ export default class DiagramMethods {
       const links = removeLink({ input, output }, this.schema.links)
 
       this?.onChange({ links })
-      this.config?.onDisconnect({ input, output })
     }
   }
 }

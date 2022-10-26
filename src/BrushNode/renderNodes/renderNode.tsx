@@ -5,6 +5,7 @@ import {
   Node
 } from '../../../lib/beautiful-react-diagrams/shared/Types'
 import BrushNode from '../BrushNode'
+import NodeContent from '../NodeContent'
 
 import styles from './renderNodes.module.scss'
 
@@ -57,11 +58,9 @@ export abstract class RenderNode extends EventTarget {
    */
   protected abstract readonly noSources: number
 
-  private _sources: (ImageData | undefined)[] = []
+  private _sources: (ImageData | undefined)[]
   private get sources() {
-    if (this._sources === undefined) {
-      this._sources = new Array(this.noSources).fill(undefined)
-    }
+    this._sources ??= new Array(this.noSources).fill(undefined)
     return this._sources
   }
 
@@ -112,7 +111,9 @@ export abstract class RenderNode extends EventTarget {
 
       this.current = this.ctx.getImageData(0, 0, w, h)
     } catch (e) {
-      console.error(e)
+      // console.groupCollapsed(`%c${this.constructor.name} failed!`, 'color: red')
+      // console.error(e)
+      // console.groupEnd()
       this.current = undefined
     } finally {
       this.dispatchEvent(new RenderEvent(this.current))
@@ -151,7 +152,7 @@ export abstract class RenderNode extends EventTarget {
       id: '',
       coordinates,
       selected: false,
-      content: <div>{this.constructor.name}</div>,
+      content: <NodeContent renderer={this} />,
       inputs: new Array(this.noSources).fill(0).map(_ => ({
         id: '',
         alignment: 'bottom'

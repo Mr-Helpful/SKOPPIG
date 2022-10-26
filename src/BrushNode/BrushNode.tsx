@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import { Node } from '../../lib/beautiful-react-diagrams'
 import styles from './BrushNode.module.scss'
 
-const BrushNode = ({ content, inputs, outputs, selected }) => {
+const BrushNode: Node['Render'] = ({ content, inputs, outputs, selected }) => {
   const contentClass = classNames(styles.content, {
     [styles.selected]: selected
   })
@@ -18,4 +18,4 @@ const BrushNode = ({ content, inputs, outputs, selected }) => {
   )
 }
 
-export default BrushNode as Node['Render']
+export default BrushNode

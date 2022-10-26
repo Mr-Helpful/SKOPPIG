@@ -7,15 +7,15 @@ import {
   ON_NODE_ADD,
   ON_NODE_REMOVE
 } from './actionTypes'
-import { Schema, Node } from '../../shared/Types'
+import { Schema, Node, Link } from '../../shared/Types'
 
-const initialState = { nodes: [], links: [] }
+const initialState: Schema = { nodes: [], links: [] }
 
 type SchemaMethods = {
   onChange: (schema: Partial<Schema>) => void
   addNode: (node: Node) => void
   removeNode: (node: Node) => void
-  connect: (input: string, output: string) => void
+  connect: (link: Link) => void
 }
 
 /**
@@ -42,8 +42,7 @@ const useSchema = (
     []
   )
   const connect = useCallback(
-    (input: string, output: string) =>
-      dispatch({ type: ON_CONNECT, payload: { input, output } }),
+    (link: Link) => dispatch({ type: ON_CONNECT, payload: link }),
     []
   )
 

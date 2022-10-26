@@ -1,17 +1,31 @@
 import { RandomNode } from './randomNode'
 
+// some random constants to ensure that x, y coordinates
+// are extremely unlikely to lie on integer coordinates
+// as this will lead to a blank noise image
+const ox = 0.23
+const oy = 0.47
+const s = 1.07
+
 export class PerlinNode extends RandomNode {
   noSources = 0
 
+  protected scale: number = 10
+
   renderCPU([]) {
     // get dimensions and buffer view on our canvas
-    const [w, h] = this.dimensions
-    const idata = this.ctx.createImageData(w, h)
-    let array = new Uint32Array(idata.data.buffer)
-    let len = array.length - 1
+    const { width: w, height: h } = this.ctx.canvas
+    var idata = this.ctx.createImageData(w, h)
+    let pixels = idata.data
+    var len = pixels.length
 
     // iterate over the image array and write pseudorandom values
-    while (len--) array[len] = this.perlinFunction(len % w, Math.floor(len / w))
+    while ((len -= 4)) {
+      const l = len / 4
+      const [x, y] = [l % w, Math.floor(l / w)].map(v => v / this.scale)
+      pixels[len - 1] = this.perlinFunction(s * (x + ox), s * (y + oy))
+      pixels[len - 2] = pixels[len - 3] = pixels[len - 4] = 0
+    }
     this.ctx.putImageData(idata, 0, 0)
   }
 

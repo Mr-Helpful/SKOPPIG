@@ -5,13 +5,13 @@ import {
   ON_NODE_REMOVE
 } from './actionTypes'
 import getNodePortsId from '../../shared/functions/getNodePortsId'
-import { Schema, Node } from '../../shared/Types'
+import { Schema, Node, Link } from '../../shared/Types'
 
 type SchemaAction =
   | { type: typeof ON_CHANGE; payload: Partial<Schema> }
   | { type: typeof ON_NODE_ADD; payload: Node }
   | { type: typeof ON_NODE_REMOVE; payload: string }
-  | { type: typeof ON_CONNECT; payload: { input: string; output: string } }
+  | { type: typeof ON_CONNECT; payload: Link }
 
 /**
  * schema reducer
@@ -19,7 +19,7 @@ type SchemaAction =
  * A Reminder here, reducer functions need to have **no** side effects
  * As React.StrictMode may trigger them twice to check purity
  */
-const schemaReducer = (state: Schema, action: SchemaAction) => {
+const schemaReducer = (state: Schema, action: SchemaAction): Schema => {
   switch (action.type) {
     case ON_CHANGE:
       return {

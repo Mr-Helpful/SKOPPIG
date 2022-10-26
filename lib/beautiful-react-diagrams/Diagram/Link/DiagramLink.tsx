@@ -7,7 +7,7 @@ import makeSvgPath from '../../shared/functions/makeSvgPath'
 import getPathMidpoint from '../../shared/functions/getPathMidpoint'
 import { useNodeRefs } from '../../Context/DiagramContext'
 import LinkLabel from './LinkLabel'
-import { DiagramEntity } from '../LinksCanvas/findInvolvedEntity'
+import { DiagramEntity, isNode } from '../LinksCanvas/findInvolvedEntity'
 import { useDiagramMethods } from '../MethodContext/MethodContext'
 
 import { Link, ClickEvent } from '../../shared/Types'
@@ -33,7 +33,6 @@ const DiagramLink = ({ input, output, link }: LinkProps) => {
     () => getCoords(input, portRefs, nodeRefs, canvas),
     [input, portRefs, nodeRefs, canvas]
   )
-  /* eslint-disable max-len */
   const classList = useMemo(
     () =>
       classNames(
@@ -47,23 +46,14 @@ const DiagramLink = ({ input, output, link }: LinkProps) => {
     () => getCoords(output, portRefs, nodeRefs, canvas),
     [output, portRefs, nodeRefs, canvas]
   )
-  /* eslint-enable max-len */
   const path = useMemo(() => {
     const pathOptions = {
-      type:
-        input.type === 'port' || output.type === 'port' ? 'bezier' : 'curve',
-      inputAlignment: { alignment: undefined, ...input.entity }.alignment,
-      outputAlignment: { alignment: undefined, ...output.entity }.alignment
+      type: isNode(input) && isNode(output) ? 'curve' : 'bezier',
+      inputAlignment: { alignment: undefined, ...input }.alignment,
+      outputAlignment: { alignment: undefined, ...output }.alignment
     }
     return makeSvgPath(inputPoint, outputPoint, pathOptions)
-  }, [
-    inputPoint,
-    outputPoint,
-    input.type,
-    input.entity,
-    output.type,
-    output.entity
-  ])
+  }, [inputPoint, outputPoint, input, output])
 
   // calculates label position
   useEffect(() => {
