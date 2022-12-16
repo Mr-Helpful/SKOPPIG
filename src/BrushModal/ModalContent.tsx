@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import Diagram, {
   createSchema,
   Schema,
@@ -68,6 +68,15 @@ const ModalContent = () => {
       console.groupEnd()
       console.groupEnd()
     }
+
+    diagram.rerenderSelected = () => {
+      for (const { selected, data } of schema.nodes) {
+        if (selected && data.instance) {
+          let renderer = data.instance as RenderNode
+          renderer.fireUpdate()
+        }
+      }
+    }
   }, [schema])
 
   // whether to select multiple nodes at once
@@ -111,7 +120,11 @@ const ModalContent = () => {
       const onRender = (ev: RenderEvent) =>
         inputRender.setSource(inIndex, ev.img)
       outputRender.addEventListener('render', onRender)
-      return () => outputRender.removeEventListener('render', onRender)
+      outputRender.fireUpdate()
+      return () => {
+        outputRender.removeEventListener('render', onRender)
+        inputRender.setSource(inIndex, undefined)
+      }
     },
     [schema]
   )

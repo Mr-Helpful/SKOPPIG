@@ -17,7 +17,7 @@ export class RenderError extends Error {
 }
 
 export class RenderEvent extends Event {
-  constructor(public img: ImageData | undefined, eventInitDict?: EventInit) {
+  constructor(public img: ImageBitmap | undefined, eventInitDict?: EventInit) {
     super('render', eventInitDict)
   }
 }
@@ -29,15 +29,22 @@ export class RenderEvent extends Event {
  * @param {[number, number]} [translation] an optional translation for output
  */
 export abstract class RenderNode extends EventTarget {
+  private static defaultMode: 'gpu' | 'cpu' = 'gpu'
+
   /* Declare a single canvas context and GPU instance for all nodes to use */
   private static ctx: CanvasRenderingContext2D
   private static gpu: GPU
+
   protected readonly ctx: CanvasRenderingContext2D
   protected readonly gpu: GPU
+
   /* Cache the data resulting from a render */
-  protected current?: ImageData = undefined
-  get img(): ImageData {
+  protected current?: ImageBitmap = undefined
+  get img(): ImageBitmap {
     return this.current
+  }
+  fireUpdate() {
+    this.dispatchEvent(new RenderEvent(this.img))
   }
 
   /**
@@ -58,7 +65,7 @@ export abstract class RenderNode extends EventTarget {
    */
   protected abstract readonly noSources: number
 
-  private _sources: (ImageData | undefined)[]
+  private _sources: (ImageBitmap | undefined)[]
   private get sources() {
     this._sources ??= new Array(this.noSources).fill(undefined)
     return this._sources
@@ -72,19 +79,20 @@ export abstract class RenderNode extends EventTarget {
    * is either not possible or not implemented
    * @note should be implemented
    */
-  protected renderCPU?(sources: ImageData[]): void
+  protected renderCPU?(sources: ImageBitmap[]): void
 
   /** renderGPU can be implemented in the future,
    * but is only really required for fast, compiled code
    * @note can be implemented
    */
-  protected renderGPU?(sources: ImageData[]): void
+  protected renderGPU?(sources: ImageBitmap[]): void
 
   /** Renders from provided sources, emitting a 'render' event on completion
    *
    * @param mode how to render the node
    */
-  render(mode: 'gpu' | 'cpu' = 'gpu') {
+  async render(mode?: 'gpu' | 'cpu') {
+    mode ??= RenderNode.defaultMode
     const [w, h] = this.dimensions
     this.ctx.clearRect(0, 0, w, h)
 
@@ -102,21 +110,27 @@ export abstract class RenderNode extends EventTarget {
           }
         case 'cpu':
           if (this.renderCPU) {
+            this.ctx.save()
             this.renderCPU(this.sources)
+            this.ctx.restore()
             break
           }
         default:
           throw this.error(`rendering method ${mode} not implemented`)
       }
 
-      this.current = this.ctx.getImageData(0, 0, w, h)
+      let data = this.ctx.getImageData(0, 0, w, h)
+      console.groupCollapsed(`${this.constructor.name}> succeeded:`)
+      console.log(data)
+      console.groupEnd()
+      this.current = await createImageBitmap(data)
     } catch (e) {
-      // console.groupCollapsed(`%c${this.constructor.name} failed!`, 'color: red')
-      // console.error(e)
-      // console.groupEnd()
+      console.groupCollapsed(`${this.constructor.name}> failed:`)
+      console.error(e)
+      console.groupEnd()
       this.current = undefined
     } finally {
-      this.dispatchEvent(new RenderEvent(this.current))
+      this.fireUpdate()
     }
   }
 
@@ -125,8 +139,9 @@ export abstract class RenderNode extends EventTarget {
    * @param i The index of source to update
    * @param source The ImageData to re-render from
    */
-  setSource(i: number, source?: ImageData) {
+  setSource(i: number, source?: ImageBitmap) {
     if (this.sources[i] === source) return
+    console.log(`${this.constructor.name}> updating source ${i}`)
     this.sources[i] = source
     this.render()
   }

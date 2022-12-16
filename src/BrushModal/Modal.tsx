@@ -30,7 +30,7 @@ const Modal = ({
   children = []
 }: NodeModalProps) => {
   const rect = useRef({})
-  const setRect = useCallback(elem => {
+  const setRect = useCallback((elem: HTMLElement) => {
     if (elem !== null) {
       const bbox = elem.getBoundingClientRect()
       rect.current = {

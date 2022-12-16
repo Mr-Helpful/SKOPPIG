@@ -10,11 +10,17 @@ const NodeContent = ({ renderer }: NodeContentProps) => {
   const [failed, setFailed] = useState(true)
   const ref = useRef<HTMLCanvasElement>()
   useEffect(() => {
+    console.log(`Content section ${renderer.constructor.name} rendered`)
     const onRender = (ev: RenderEvent) => {
+      const cnv = ref.current
+      console.log(`Content for ${renderer.constructor.name} updated`)
+
       if (ev.img === undefined) setFailed(true)
-      else if (ref.current !== null) {
-        const ctx = ref.current.getContext('2d')
-        ctx.putImageData(ev.img, 0, 0)
+      else if (cnv !== null) {
+        const ctx = cnv.getContext('2d')
+        // we always want to overwrite the last image
+        ctx.globalCompositeOperation = 'copy'
+        ctx.drawImage(ev.img, 0, 0)
         setFailed(false)
       }
     }
@@ -22,7 +28,7 @@ const NodeContent = ({ renderer }: NodeContentProps) => {
     renderer.addEventListener('render', onRender)
     renderer.render('gpu')
     return () => {
-      renderer.addEventListener('render', onRender)
+      renderer.removeEventListener('render', onRender)
     }
   }, [ref, renderer, setFailed])
 
@@ -36,7 +42,7 @@ const NodeContent = ({ renderer }: NodeContentProps) => {
         ref={ref}
         width={width}
         height={height}
-        style={{ display: failed ? 'none' : 'block' }}
+        style={{ display: failed ? 'none' : 'block', border: '1px solid red' }}
       />
     </div>
   )

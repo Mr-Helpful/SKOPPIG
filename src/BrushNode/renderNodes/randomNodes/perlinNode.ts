@@ -2,10 +2,10 @@ import { RandomNode } from './randomNode'
 
 // some random constants to ensure that x, y coordinates
 // are extremely unlikely to lie on integer coordinates
-// as this will lead to a blank noise image
-const ox = 0.23
-const oy = 0.47
-const s = 1.07
+// as this will lead to a blank image being generated
+const ox = 0.2495305
+const oy = 0.1010992
+const s = 1.06925175
 
 export class PerlinNode extends RandomNode {
   noSources = 0

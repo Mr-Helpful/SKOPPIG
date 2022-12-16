@@ -42,7 +42,9 @@ It might be possible to do wfc via GPU (for canvas size C, brush size B, section
 2. Whilst maximum entropy > 0
    1. Compute maximum + minimum entropy via GPU - O(logC)
    2. If each cell has entropy = the minimum entropy, mark cell to update - O(1)
-   3. Whilst there are still cells to update
+   3. Whilst there are still cells to update for a cell C to update
+      1. Attempt to update the entropy of cells around C
+      2. If a cell is updated, mark it for update and check
 
 #### Ruler
 

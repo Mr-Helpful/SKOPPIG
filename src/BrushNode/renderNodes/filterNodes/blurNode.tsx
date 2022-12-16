@@ -6,9 +6,7 @@ export class BlurNode extends FilterNode {
   }
 
   renderCPU([source]) {
-    this.ctx.save()
-    this.ctx.filter = `blur(${this.size})`
-    this.ctx.putImageData(source, 0, 0)
-    this.ctx.restore()
+    this.ctx.filter = `blur(${this.size}px)`
+    this.ctx.drawImage(source, 0, 0)
   }
 }

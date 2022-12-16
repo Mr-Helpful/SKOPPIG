@@ -85,7 +85,7 @@ const Diagram = ({
     diagram.showRefs = () => {
       console.groupCollapsed('%cNew references', 'color: green')
       const maxLength = Math.max(
-        ...Object.keys(portElems).map(s => s.length),
+        ...Object.keys(nodeElems).map(s => s.length),
         ...Object.keys(portElems).map(s => s.length)
       )
       console.groupCollapsed('%cPort references', 'color: green')

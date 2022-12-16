@@ -63,6 +63,11 @@ const DiagramLink = ({ input, output, link }: LinkProps) => {
     }
   }, [pathRef, link.label, inputPoint, outputPoint])
 
+  // on link create
+  useEffect(() => {
+    return methods.config?.onLinkMount(link)
+  }, [link, methods])
+
   // on link delete
   const onDoubleClick = useCallback(
     () => methods.onLinkDelete(link),
