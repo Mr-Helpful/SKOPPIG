@@ -43,14 +43,13 @@ export type Node = {
   content?: ReactNode
   inputs?: Port[]
   outputs?: Port[]
-  type?: 'default'
   Render?: NodeRender
   className?: string
   collapsed?: Schema
   data?: any
 }
 
-export type NodeRender = FC<
+type NodeRender = FC<
   Omit<Node, 'coordinates' | 'inputs' | 'outputs'> & {
     inputs: ReactNode[]
     outputs: ReactNode[]

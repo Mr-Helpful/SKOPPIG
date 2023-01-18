@@ -37,44 +37,23 @@ const defaultSchema: Schema = {
   links: []
 }
 
-/** Returns a function that can be used to assign unique ids to any node it is
- * called with and its ports
- */
-const useIdAssigner = () => {
-  const nId = useRef(0)
-  const pId = useRef(0)
-
-  return useCallback(({ ...node }: Node): Node => {
-    if (node.inputs)
-      node.inputs = node.inputs.map(port => {
-        return { ...port, id: `port-${pId.current++}` }
-      })
-    if (node.outputs)
-      node.outputs = node.outputs.map(port => {
-        return { ...port, id: `port-${pId.current++}` }
-      })
-    return { ...node, id: `node-${nId.current++}` }
-  }, [])
-}
-
 /** A Temporary store for brush nodes
  * 
 [ ] Dragging from stash to diagram
 [ ] Dragging from diagram to stash
  */
 const NodeStash = ({ nodes, addOne }: NodeStashProps) => {
-  const assigner = useIdAssigner()
   const [displayed, setDisplayed] = useState([])
-  const createNode = useCallback(
-    (Renderer: RenderClass) => assigner(new Renderer(dims).toNode(pos)),
-    [assigner]
-  )
+
+  // useEffect(() => {
+  //   console.log(`Node stash updated`)
+  // }, [addOne])
 
   // make sure that we'll only load our stash nodes
   // when we have a document object available
   useEffect(() => {
-    setDisplayed(nodes.map(createNode))
-  }, [nodes, createNode])
+    setDisplayed(nodes.map(Renderer => new Renderer(dims).toNode(pos)))
+  }, [nodes])
 
   return (
     <div className={styles.nodeStash}>
@@ -91,7 +70,8 @@ const NodeStash = ({ nodes, addOne }: NodeStashProps) => {
             config: {
               ...defaultConfig,
               onNodeClick(_, { data: { instance } }) {
-                addOne(createNode(instance.constructor))
+                const Renderer = instance.constructor
+                addOne(new Renderer(dims).toNode(pos))
               }
             },
             setSegment() {}

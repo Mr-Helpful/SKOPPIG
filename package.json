@@ -24,7 +24,8 @@
     "react-dom": "18.2.0",
     "react-icons": "^4.4.0",
     "react-transition-group": "^4.4.5",
-    "sass": "^1.54.3"
+    "sass": "^1.54.3",
+    "welshpowell": "^1.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.18.10",

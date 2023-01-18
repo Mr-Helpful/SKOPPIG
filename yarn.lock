@@ -4291,6 +4291,7 @@ next@canary:
     react-transition-group: ^4.4.5
     sass: ^1.54.3
     typescript: 4.7.4
+    welshpowell: ^1.0.1
   peerDependencies:
     rxjs: "*"
   languageName: unknown
@@ -4830,6 +4831,13 @@ next@canary:
   bin:
     webpack-bundle-analyzer: lib/bin/analyzer.js
   checksum: 00b7bf4ac9fca17062b66b6897145b94e87153d3ec8815f0e0c05a3b8a1ca75320262db01a5fa634f604ee3d41aecde1ee59838d05b6d03cd5be62eb1addbcf8
+  languageName: node
+  linkType: hard
+
+"welshpowell@npm:^1.0.1":
+  version: 1.0.1
+  resolution: "welshpowell@npm:1.0.1"
+  checksum: d8120857f55d4b395624391fcc73d9da6e38fa41b87a8021681bc9fc615acdcd16571ee9c2523e0130bf6983c25c632608add6682faccb339d971d8daa258199
   languageName: node
   linkType: hard
 

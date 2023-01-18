@@ -40,10 +40,13 @@ export abstract class RenderNode extends EventTarget {
 
   /* Cache the data resulting from a render */
   protected current?: ImageBitmap = undefined
-  get img(): ImageBitmap {
+  get img() {
     return this.current
   }
   fireUpdate() {
+    console.groupCollapsed(`${this.constructor.name}> updated`)
+    console.log(this.current)
+    console.groupEnd()
     this.dispatchEvent(new RenderEvent(this.img))
   }
 
@@ -79,31 +82,39 @@ export abstract class RenderNode extends EventTarget {
    * is either not possible or not implemented
    * @note should be implemented
    */
-  protected renderCPU?(sources: ImageBitmap[]): void
+  protected async renderCPU?(sources: ImageBitmap[]): Promise<void>
 
   /** renderGPU can be implemented in the future,
    * but is only really required for fast, compiled code
    * @note can be implemented
    */
-  protected renderGPU?(sources: ImageBitmap[]): void
+  protected async renderGPU?(sources: ImageBitmap[]): Promise<void>
 
   /** Renders from provided sources, emitting a 'render' event on completion
    *
    * @param mode how to render the node
    */
-  async render(mode?: 'gpu' | 'cpu') {
+  async update(mode?: 'gpu' | 'cpu') {
+    this.current = await this.render(this.sources, mode)
+    this.fireUpdate()
+  }
+
+  async render(
+    sources: ImageBitmap[],
+    mode?: 'gpu' | 'cpu'
+  ): Promise<ImageBitmap> {
     mode ??= RenderNode.defaultMode
     const [w, h] = this.dimensions
     this.ctx.clearRect(0, 0, w, h)
 
     try {
-      const index = this.sources.findIndex(source => source === undefined)
+      const index = sources.findIndex(source => source === undefined)
       if (index > -1) throw this.error(`source ${index} is not defined`)
 
       switch (mode) {
         case 'gpu':
           if (this.renderGPU) {
-            this.renderGPU(this.sources)
+            this.renderGPU(sources)
             const cnv = this.gpu.canvas
             this.ctx.drawImage(cnv, 0, 0, w, h, 0, 0, w, h)
             break
@@ -111,7 +122,7 @@ export abstract class RenderNode extends EventTarget {
         case 'cpu':
           if (this.renderCPU) {
             this.ctx.save()
-            this.renderCPU(this.sources)
+            this.renderCPU(sources)
             this.ctx.restore()
             break
           }
@@ -120,17 +131,10 @@ export abstract class RenderNode extends EventTarget {
       }
 
       let data = this.ctx.getImageData(0, 0, w, h)
-      console.groupCollapsed(`${this.constructor.name}> succeeded:`)
-      console.log(data)
-      console.groupEnd()
-      this.current = await createImageBitmap(data)
+      return await createImageBitmap(data)
     } catch (e) {
-      console.groupCollapsed(`${this.constructor.name}> failed:`)
-      console.error(e)
-      console.groupEnd()
-      this.current = undefined
-    } finally {
-      this.fireUpdate()
+      // probably want to log errors here or something
+      return undefined
     }
   }
 
@@ -141,9 +145,9 @@ export abstract class RenderNode extends EventTarget {
    */
   setSource(i: number, source?: ImageBitmap) {
     if (this.sources[i] === source) return
-    console.log(`${this.constructor.name}> updating source ${i}`)
+    // console.log(`${this.constructor.name}> updating source ${i}`)
     this.sources[i] = source
-    this.render()
+    this.update()
   }
 
   /*----------------------------------------------------------------
@@ -162,17 +166,20 @@ export abstract class RenderNode extends EventTarget {
   /*----------------------------------------------------------------
   -                         Diagram methods                        -
   ----------------------------------------------------------------*/
+  private static nodeId = 1
+  private static linkId = 1
+
   toNode(coordinates: Coords): Node {
     return {
-      id: '',
+      id: `node-${RenderNode.nodeId++}`,
       coordinates,
       selected: false,
       content: <NodeContent renderer={this} />,
       inputs: new Array(this.noSources).fill(0).map(_ => ({
-        id: '',
+        id: `link-${RenderNode.linkId++}`,
         alignment: 'bottom'
       })),
-      outputs: [{ id: '', alignment: 'top' }],
+      outputs: [{ id: `link-${RenderNode.linkId++}`, alignment: 'top' }],
       Render: BrushNode,
       data: { instance: this }
     }

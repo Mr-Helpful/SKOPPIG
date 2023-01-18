@@ -1,6 +1,22 @@
-import { Schema, Node, Link, Port } from '../../lib/beautiful-react-diagrams'
-import { difference, toArray } from './setMethods'
-import { graphChildren, toGraph, graphRootsFrom } from './graphMethods'
+import { Schema, Node, Link, Port } from '../../beautiful-react-diagrams'
+import { difference, toArray } from '../../../src/DiagramMenu/setMethods'
+import {
+  graphChildren,
+  toGraph,
+  graphRootsFrom,
+  graphRoots
+} from './graphMethods'
+
+export const nodeInputIndex = (
+  pId: string,
+  { nodes }: Schema
+): [Node, number] =>
+  nodes
+    .map((node: Node): [Node, number] => [
+      node,
+      node.inputs?.findIndex(({ id }) => id === pId) ?? -1
+    ])
+    .find(([_, i]) => i !== -1)
 
 /** All descendants of nodes within a schema */
 export const childrenOf = (ids: string[], schema: Schema): Set<string> => {
@@ -18,10 +34,10 @@ export const cycleWith = (ids: string[], schema: Schema): boolean => {
   return ids.every(id => children.has(id))
 }
 
-// /** Finds **all** roots in a schema */
-// export const rootsIn = (schema: Schema): Set<string> => {
-//   return graphRoots(toGraph(schema))
-// }
+/** Finds **all** roots in a schema */
+export const rootsIn = (schema: Schema): Set<string> => {
+  return graphRoots(toGraph(schema))
+}
 
 // /** Finds all roots in a schema accessible from nodes */
 // export const rootsFrom = (ids: string[], schema: Schema): Set<string> => {
@@ -64,7 +80,7 @@ type IdMap = { [id: string]: string }
  > { port2: "node1", port3: "node1" }
  * ```
  */
-const portToNode = ({ nodes, links }: Schema): IdMap => {
+export const portToNode = ({ nodes, links }: Schema): IdMap => {
   let outMap: IdMap = {}
   for (const node of nodes) {
     for (const port of node.outputs ?? []) outMap[port.id] = node.id

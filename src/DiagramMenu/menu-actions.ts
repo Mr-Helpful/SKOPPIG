@@ -1,4 +1,6 @@
 import { Schema, Node } from '../../lib/beautiful-react-diagrams'
+import { RenderNode } from '../BrushNode/renderNodes'
+import { CollapsedNode } from '../BrushNode/renderNodes/compositeNodes/collapsedNode'
 import {
   childrenOf,
   collapsibleFrom,
@@ -6,7 +8,7 @@ import {
   splitSchema,
   selectedIds,
   selectIn
-} from './schemaMethods'
+} from '../../lib/skoppig/schema/schemaMethods'
 
 export class MenuActions {
   constructor(
@@ -66,16 +68,20 @@ export class MenuActions {
 
     // determine the lowest possible id that isn't taken
     let newId = 0
-    const sortIds = outSchema.nodes.map(({ id }) => id).sort()
+    const sortIds = schema.nodes.map(({ id }) => id).sort()
     for (const id of sortIds) if (id === `node-${newId}`) newId++
 
     // the new node to replace the subgraph with
+    const renderer = toCollapse.data.instance as RenderNode
     const replacement: Node = {
       ...toCollapse,
       id: `node-${newId}`,
       inputs: ports,
       collapsed,
-      data: { ...toCollapse.data }
+      data: {
+        ...toCollapse.data,
+        instance: new CollapsedNode(renderer.dimensions, collapsed)
+      }
     }
 
     // create the new schema using the 'out' schema and new node we generated

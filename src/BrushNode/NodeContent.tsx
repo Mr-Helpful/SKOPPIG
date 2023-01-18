@@ -10,10 +10,8 @@ const NodeContent = ({ renderer }: NodeContentProps) => {
   const [failed, setFailed] = useState(true)
   const ref = useRef<HTMLCanvasElement>()
   useEffect(() => {
-    console.log(`Content section ${renderer.constructor.name} rendered`)
     const onRender = (ev: RenderEvent) => {
       const cnv = ref.current
-      console.log(`Content for ${renderer.constructor.name} updated`)
 
       if (ev.img === undefined) setFailed(true)
       else if (cnv !== null) {
@@ -26,7 +24,7 @@ const NodeContent = ({ renderer }: NodeContentProps) => {
     }
 
     renderer.addEventListener('render', onRender)
-    renderer.render('gpu')
+    renderer.update()
     return () => {
       renderer.removeEventListener('render', onRender)
     }

@@ -9,7 +9,7 @@ import Diagram, {
 import DiagramMenu from '../DiagramMenu/DiagramMenu'
 import NodeStash from '../NodeStash/NodeStash'
 import { ModalBackground } from './Modal'
-import { cycleWith } from '../DiagramMenu/schemaMethods'
+import { cycleWith } from '../../lib/skoppig/schema/schemaMethods'
 import { ClickEvent } from '../../lib/beautiful-react-diagrams/shared/Types'
 import StashNodes, { RenderEvent, RenderNode } from '../BrushNode/renderNodes'
 import { diagram } from '../../lib/development/diagram'
@@ -27,7 +27,7 @@ const noCycles = (link: Link, { nodes, links }: Schema) => {
 
 const notSameType = ({ input, output }: Link, { nodes }: Schema) => {
   // determines the type of a port (i.e. input or output)
-  const portType = portId => {
+  const portType = (portId: string) => {
     for (const { inputs, outputs } of nodes) {
       for (const { id } of inputs) if (id === portId) return 'input'
       for (const { id } of outputs) if (id === portId) return 'output'
@@ -37,8 +37,18 @@ const notSameType = ({ input, output }: Link, { nodes }: Schema) => {
   return portType(input) !== portType(output)
 }
 
-const shouldLink = (link: Link, schema: Schema) =>
-  noCycles(link, schema) && notSameType(link, schema)
+const inputLinked = ({ input, output }: Link, { nodes, links }: Schema) => {
+  const inPorts = nodes.flatMap(({ inputs }) => inputs.map(({ id }) => id))
+  const inId = inPorts.find(inPort => inPort === input || inPort === output)
+  return links.some(({ input, output }) => inId === input || inId === output)
+}
+
+const shouldLink = (link: Link, schema: Schema) => {
+  let noCycles_ = noCycles(link, schema)
+  let notSameType_ = notSameType(link, schema)
+  let inputAvailable_ = !inputLinked(link, schema)
+  return noCycles_ && notSameType_ && inputAvailable_
+}
 
 const findNode = (nodes: Node[], eId: string): Node => {
   return nodes.find(
@@ -73,7 +83,7 @@ const ModalContent = () => {
       for (const { selected, data } of schema.nodes) {
         if (selected && data.instance) {
           let renderer = data.instance as RenderNode
-          renderer.fireUpdate()
+          renderer.update()
         }
       }
     }
@@ -110,7 +120,6 @@ const ModalContent = () => {
 
   const onLinkMount = useCallback(
     (link: Link) => {
-      console.log('link added: ', link)
       const inputNode = findNode(schema.nodes, link.input)!
       const outputNode = findNode(schema.nodes, link.output)!
       const inputRender = inputNode.data.instance as RenderNode
@@ -122,6 +131,7 @@ const ModalContent = () => {
       outputRender.addEventListener('render', onRender)
       outputRender.fireUpdate()
       return () => {
+        console.log('removing link')
         outputRender.removeEventListener('render', onRender)
         inputRender.setSource(inIndex, undefined)
       }

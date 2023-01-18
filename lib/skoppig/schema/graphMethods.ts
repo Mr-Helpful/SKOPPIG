@@ -1,5 +1,5 @@
-import { Schema } from '../../lib/beautiful-react-diagrams'
-import { intersect } from './setMethods'
+import { Schema } from '../../beautiful-react-diagrams'
+import { intersect } from '../../../src/DiagramMenu/setMethods'
 
 type Graph = { [id: string]: string[] }
 
@@ -94,7 +94,7 @@ const undirect = (graph: Graph): Graph => {
 }
 
 /** Finds **all** roots in a given graph */
-const graphRoots = (graph: Graph): Set<string> => {
+export const graphRoots = (graph: Graph): Set<string> => {
   const reversed = reverse(graph)
   const nodeIds = Object.keys(reversed)
   return new Set(nodeIds.filter(id => reversed[id].length == 0))

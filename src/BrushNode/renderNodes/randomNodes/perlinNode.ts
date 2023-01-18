@@ -3,9 +3,7 @@ import { RandomNode } from './randomNode'
 // some random constants to ensure that x, y coordinates
 // are extremely unlikely to lie on integer coordinates
 // as this will lead to a blank image being generated
-const ox = 0.2495305
-const oy = 0.1010992
-const s = 1.06925175
+const [ox, oy, s] = [0.2495305, 0.1010992, 1.06925175]
 
 export class PerlinNode extends RandomNode {
   noSources = 0

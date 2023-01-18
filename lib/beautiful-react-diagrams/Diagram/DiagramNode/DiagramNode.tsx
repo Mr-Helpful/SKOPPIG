@@ -12,11 +12,10 @@ import {
   defaultData,
   defaultPorts,
   defaultSchema,
-  Node,
-  NodeRender
+  Node
 } from '../../shared/Types'
 
-const DefaultRender: NodeRender = ({ content, inputs, outputs }) => (
+const DefaultRender: Node['Render'] = ({ content, inputs, outputs }) => (
   <>
     {content}
     <div className="bi-port-wrapper">
@@ -41,7 +40,6 @@ const DiagramNode = (node: Node) => {
     content = defaultContent,
     inputs = defaultPorts,
     outputs = defaultPorts,
-    type = 'default',
     Render = DefaultRender,
     className = '',
     collapsed = defaultSchema,
@@ -120,7 +118,6 @@ const DiagramNode = (node: Node) => {
       <Render
         id={id}
         content={content}
-        type={type}
         inputs={InputPorts}
         outputs={OutputPorts}
         data={data}
