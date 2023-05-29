@@ -11,7 +11,7 @@ import { Coords, Schema } from '../../lib/beautiful-react-diagrams/shared/Types'
 const dims: Coords = [50, 50]
 const pos: Coords = [200, 200]
 
-type RenderClass = typeof RenderNodes[number]
+export type RenderClass = typeof RenderNodes[number]
 
 interface NodeStashProps {
   nodes: RenderClass[]

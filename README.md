@@ -25,24 +25,16 @@ Flood fill an area by tiling a brush back to back and cropping
 
 Flood fill an area by using a [wfc](https://github.com/mxgmn/WaveFunctionCollapse) algorithm and cropping.
 
-```ts
-WFC_GPU(Canvas, Brush, N){
-  let C = Canvas.size()[0]
-  let B = Brush.size()[0]
-
-  let Sides = new Array<Number /*B-N bit set*/, [(B-N)**2, 4]>()
-  // Fill in the adjacency set
-
-}
-```
-
 It might be possible to do wfc via GPU (for canvas size C, brush size B, section size S):
 
 1. Precompute side hashes for each section of brush result - O((B/S)^2)
+   1. Also could be done via GPU
 2. Whilst maximum entropy > 0
    1. Compute maximum + minimum entropy via GPU - O(logC)
-   2. If each cell has entropy = the minimum entropy, mark cell to update - O(1)
-   3. Whilst there are still cells to update for a cell C to update
+   2. For each cell has entropy = the minimum entropy
+      1. Assign random value to cell
+      2. Mark cell for updates
+   3. Whilst there are still cells to update, For each cell C to update
       1. Attempt to update the entropy of cells around C
       2. If a cell is updated, mark it for update and check
 

@@ -1,6 +1,5 @@
 import { RenderNode } from '../../../src/BrushNode/renderNodes'
 import { Schema } from '../../beautiful-react-diagrams'
-import { graphRootsFrom } from '../schema/graphMethods'
 import { portToNode, rootsIn } from '../schema/schemaMethods'
 
 type FlatNode = [RenderNode, string[]]

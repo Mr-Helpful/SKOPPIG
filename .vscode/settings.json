@@ -14,11 +14,15 @@
     "**/_esy": true,
     "**/.esy": true,
     ".vscode": true,
-    ".github": false,
+    ".github": true,
     "build": true,
     "node_modules": true,
     ".next": true
   },
   "explorerExclude.backup": {},
-  "findUnusedExports.detectCircularImports": true
+  "findUnusedExports.detectCircularImports": true,
+  "svn.ignoreMissingSvnWarning": true,
+  "files.watcherExclude": {
+    "**/target": true
+  }
 }
